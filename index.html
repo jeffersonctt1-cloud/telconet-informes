@@ -1,0 +1,1748 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>TELCONET S.A. — Inspección de Pozos</title>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf-autotable/3.8.2/jspdf.plugin.autotable.min.js"></script>
+<style>
+*{margin:0;padding:0;box-sizing:border-box}
+:root{--blue:#1a3a5c;--blue2:#2563a8;--red:#e8001d;--ok:#16a34a;--warn:#d97706;--err:#dc2626;--bg:#eef2f7;--card:#fff;--text:#1e293b;--muted:#64748b;--border:#cbd5e1;--r:10px;--sh:0 2px 12px rgba(0,0,0,.09)}
+body{font-family:'Segoe UI',Arial,sans-serif;background:var(--bg);color:var(--text);min-height:100vh}
+::-webkit-scrollbar{width:5px}::-webkit-scrollbar-thumb{background:#94a3b8;border-radius:3px}
+.app-header{background:linear-gradient(135deg,#0d2240,#1a3a5c);color:#fff;box-shadow:0 4px 20px rgba(0,0,0,.3);position:sticky;top:0;z-index:100}
+.hinner{display:flex;align-items:center;justify-content:space-between;padding:10px 24px;gap:12px}
+.logo-area{display:flex;align-items:center;gap:12px}
+.logo-img{height:44px;background:#fff;border-radius:8px;padding:4px 8px;flex-shrink:0}
+.logo-text h1{font-size:18px;font-weight:800;letter-spacing:.4px}
+.logo-text span{font-size:10px;opacity:.7;letter-spacing:1px;text-transform:uppercase}
+.hbtns{display:flex;gap:8px;align-items:center;flex-wrap:wrap}
+.btn{display:inline-flex;align-items:center;gap:6px;padding:8px 16px;border:none;border-radius:7px;font-size:12.5px;font-weight:600;cursor:pointer;transition:.15s;white-space:nowrap}
+.btn-red{background:var(--red);color:#fff}.btn-red:hover{background:#b8001a}
+.btn-outline{background:rgba(255,255,255,.12);color:#fff;border:1.5px solid rgba(255,255,255,.3)}.btn-outline:hover{background:rgba(255,255,255,.22)}
+.btn-ghost{background:var(--bg);color:var(--text);border:1.5px solid var(--border)}.btn-ghost:hover{background:#dde4ef}
+.btn-success{background:var(--ok);color:#fff}.btn-success:hover{background:#15803d}
+.btn-danger{background:var(--err);color:#fff}.btn-danger:hover{background:#b91c1c}
+.btn-sm{padding:6px 12px;font-size:12px}.btn-xs{padding:3px 8px;font-size:11px}
+.wrap{max-width:1080px;margin:0 auto;padding:22px 16px 50px}
+.sbar{display:flex;align-items:center;justify-content:space-between;background:#fff;border-radius:var(--r);padding:10px 16px;margin-bottom:18px;box-shadow:var(--sh);flex-wrap:wrap;gap:8px}
+.sinfo{display:flex;align-items:center;gap:8px;font-size:12.5px;color:var(--muted)}
+.sdot{width:8px;height:8px;border-radius:50%;background:#94a3b8;flex-shrink:0}
+.sdot.saved{background:var(--ok)}.sdot.dirty{background:var(--warn);animation:pulse .9s infinite}
+@keyframes pulse{0%,100%{opacity:1}50%{opacity:.3}}
+.card{background:#fff;border-radius:var(--r);box-shadow:var(--sh);margin-bottom:18px;overflow:hidden}
+.card-head{background:var(--blue);display:flex;align-items:center}
+.sec-n{padding:10px 14px;background:rgba(0,0,0,.18);color:#fff;font-size:13px;font-weight:800;border-right:1px solid rgba(255,255,255,.12)}
+.card-head h2{padding:10px 14px;font-size:13px;font-weight:700;color:#fff;text-transform:uppercase;letter-spacing:.4px}
+.card-body{padding:20px}
+.fg label{display:block;font-size:10.5px;font-weight:700;text-transform:uppercase;letter-spacing:.5px;color:var(--muted);margin-bottom:5px}
+.fg label .req{color:var(--red);margin-left:2px}
+.fi{width:100%;padding:8px 11px;border:1.5px solid var(--border);border-radius:7px;font-size:13px;background:#f8fafc;color:var(--text);transition:.15s;font-family:inherit}
+.fi:focus{outline:none;border-color:var(--blue2);background:#fff;box-shadow:0 0 0 3px rgba(37,99,168,.1)}
+select.fi{cursor:pointer}textarea.fi{resize:vertical;min-height:100px;line-height:1.5}
+.g2{display:grid;grid-template-columns:1fr 1fr;gap:14px;margin-bottom:14px}
+.g1{margin-bottom:14px}
+.twrap{overflow-x:auto;margin-bottom:10px}
+table.pt{width:100%;border-collapse:collapse;font-size:12.5px;min-width:580px}
+table.pt thead th{background:var(--blue);color:#fff;padding:9px 8px;text-align:left;font-size:11px;font-weight:700;white-space:nowrap}
+table.pt thead th:first-child{width:40px;text-align:center}
+table.pt tbody tr{border-bottom:1px solid var(--border)}
+table.pt tbody tr:nth-child(even){background:#f0f4f8}
+table.pt tbody tr:hover{background:#e4ecf8}
+table.pt td{padding:4px 6px;vertical-align:middle;border:1px solid var(--border)}
+table.pt td:first-child{text-align:center;font-weight:700;color:var(--muted);font-size:11.5px}
+table.pt td input,table.pt td select{width:100%;padding:5px 7px;border:1.5px solid transparent;border-radius:5px;font-size:12px;background:transparent;font-family:inherit}
+table.pt td input:focus,table.pt td select:focus{outline:none;border-color:var(--blue2);background:#fff}
+.pgrid{display:grid;grid-template-columns:1fr 1fr;gap:16px}
+.pslot{border:2px dashed var(--border);border-radius:var(--r);overflow:hidden;background:#f8fafc;transition:.2s}
+.pslot.has-img{border-style:solid;border-color:var(--blue2)}
+.phead{background:var(--blue);padding:7px 11px;font-size:11.5px;font-weight:700;color:#fff;display:flex;align-items:center;justify-content:space-between}
+.pzone{min-height:148px;display:flex;flex-direction:column;align-items:center;justify-content:center;cursor:pointer;padding:12px;text-align:center;transition:.2s}
+.pzone:hover{background:#e8f0fb}
+.pzone svg{width:32px;height:32px;color:#94a3b8;margin-bottom:7px}
+.pzone p{font-size:11.5px;color:var(--muted);line-height:1.4}
+.pzone strong{color:var(--blue2)}
+.ppreview{position:relative}
+.ppreview img{width:100%;height:148px;object-fit:cover;display:block}
+.prm{position:absolute;top:4px;right:4px;width:22px;height:22px;background:rgba(220,38,38,.9);color:#fff;border:none;border-radius:50%;cursor:pointer;font-size:11px;display:flex;align-items:center;justify-content:center}
+.pcoords{padding:8px 12px 12px;border-top:1px solid var(--border);background:#f8fafc}
+.pcoords label{display:block;font-size:10px;font-weight:700;text-transform:uppercase;letter-spacing:.4px;color:var(--muted);margin-bottom:4px}
+.pcoord-val{font-size:11.5px;color:var(--text);background:#fff;border:1.5px solid var(--border);border-radius:6px;padding:6px 9px;min-height:32px}
+.toast-c{position:fixed;bottom:20px;right:20px;z-index:9999;display:flex;flex-direction:column;gap:7px}
+.toast{background:#fff;border-radius:8px;padding:10px 14px;box-shadow:0 8px 24px rgba(0,0,0,.15);display:flex;align-items:center;gap:9px;font-size:12.5px;font-weight:500;min-width:220px;border-left:3px solid;animation:tin .22s ease}
+.toast.ok{border-color:var(--ok)}.toast.err{border-color:var(--err)}.toast.inf{border-color:var(--blue2)}
+@keyframes tin{from{transform:translateX(110%);opacity:0}to{transform:none;opacity:1}}
+@keyframes tout{from{transform:none;opacity:1}to{transform:translateX(110%);opacity:0}}
+.ov{position:fixed;inset:0;background:rgba(0,0,0,.45);z-index:500;display:flex;align-items:center;justify-content:center;padding:16px;backdrop-filter:blur(3px);opacity:0;visibility:hidden;transition:.2s}
+.ov.open{opacity:1;visibility:visible}
+.dlg{background:#fff;border-radius:12px;max-width:380px;width:100%;padding:26px;box-shadow:0 20px 50px rgba(0,0,0,.22);transform:scale(.95);transition:.2s}
+.ov.open .dlg{transform:scale(1)}
+.dlg h3{font-size:16px;margin-bottom:8px}.dlg p{font-size:13px;color:var(--muted);line-height:1.5;margin-bottom:20px}
+.dlg-btns{display:flex;gap:8px;justify-content:flex-end}
+.pdfov{display:none;position:fixed;inset:0;background:rgba(10,25,55,.65);z-index:600;flex-direction:column;align-items:center;justify-content:center;color:#fff;gap:14px}
+.pdfov.show{display:flex}
+.spin{width:44px;height:44px;border:4px solid rgba(255,255,255,.2);border-top-color:#fff;border-radius:50%;animation:sp .6s linear infinite}
+@keyframes sp{to{transform:rotate(360deg)}}
+.pdfov p{font-size:14px;font-weight:600;opacity:.9}
+.btn-gps{background:var(--blue);color:#fff;border:none;border-radius:5px;padding:5px 7px;cursor:pointer;font-size:13px;flex-shrink:0;line-height:1;transition:.15s}
+.btn-gps:hover{background:var(--blue2)}.btn-gps:disabled{background:#94a3b8;cursor:default}
+
+.dlg-preview{background:#fff;border-radius:12px;max-width:740px;width:100%;max-height:90vh;display:flex;flex-direction:column;box-shadow:0 20px 50px rgba(0,0,0,.25);transform:scale(.96);transition:.2s}
+.ov.open .dlg-preview{transform:scale(1)}
+.prev-head{background:var(--blue);padding:13px 18px;display:flex;align-items:center;justify-content:space-between;border-radius:12px 12px 0 0;flex-shrink:0}
+.prev-head h3{color:#fff;font-size:14px;font-weight:800;letter-spacing:.4px;text-transform:uppercase}
+.prev-close{background:rgba(255,255,255,.15);color:#fff;border:none;border-radius:6px;width:28px;height:28px;cursor:pointer;font-size:15px;display:flex;align-items:center;justify-content:center}
+.prev-close:hover{background:rgba(255,255,255,.3)}
+.prev-body{flex:1;overflow-y:auto;padding:18px;display:flex;flex-direction:column;gap:14px}
+.prev-foot{padding:12px 18px;border-top:1px solid var(--border);display:flex;justify-content:flex-end;gap:10px;flex-shrink:0;background:#fff;border-radius:0 0 12px 12px}
+.prev-sec{border:1px solid var(--border);border-radius:8px;overflow:hidden}
+.prev-sec-head{background:var(--blue);color:#fff;padding:7px 12px;font-size:10.5px;font-weight:700;text-transform:uppercase;letter-spacing:.5px}
+.prev-sec-body{padding:12px 14px}
+.prev-fields{display:flex;flex-direction:column;gap:0}
+.prev-field{display:grid;grid-template-columns:130px 1fr;gap:8px;padding:5px 0;border-bottom:1px solid #f1f5f9;font-size:12.5px}
+.prev-field:last-child{border-bottom:none}
+.prev-lbl{color:var(--muted);font-weight:700;font-size:10.5px;text-transform:uppercase;letter-spacing:.3px;padding-top:1px}
+.prev-val{color:var(--text)}
+.prev-tbl{width:100%;border-collapse:collapse;font-size:11.5px}
+.prev-tbl th{background:var(--blue);color:#fff;padding:7px 8px;text-align:left;font-size:10.5px;font-weight:700;white-space:nowrap}
+.prev-tbl td{padding:6px 8px;border:1px solid var(--border)}
+.prev-tbl tr:nth-child(even) td{background:#f8fafc}
+.prev-photos{display:grid;grid-template-columns:repeat(auto-fill,minmax(120px,1fr));gap:10px}
+.prev-photo{border:1px solid var(--border);border-radius:8px;overflow:hidden}
+.prev-photo img{width:100%;height:85px;object-fit:cover;display:block}
+.prev-photo-cap{padding:5px 8px;background:#f8fafc}
+.prev-photo-cap b{display:block;font-size:11px;color:var(--text)}
+.prev-photo-cap span{font-size:10.5px;color:var(--muted)}
+.prev-txt{font-size:12.5px;line-height:1.65;color:var(--text);white-space:pre-line;margin:0}
+.prev-empty{color:#94a3b8;font-style:italic;font-size:12.5px}
+@media(max-width:640px){
+  .prev-field{grid-template-columns:1fr;gap:2px}
+  .prev-photos{grid-template-columns:1fr 1fr 1fr}
+  .dlg-preview{max-height:95vh}
+}
+@media(max-width:640px){.hinner{flex-direction:column;align-items:flex-start;padding:10px 14px}.hbtns{width:100%}.hbtns .btn{flex:1;font-size:11.5px;padding:7px 8px}.wrap{padding:12px 10px 40px}.g2{grid-template-columns:1fr}.card-body{padding:14px}.pgrid{grid-template-columns:1fr 1fr}}
+@media(max-width:380px){.pgrid{grid-template-columns:1fr}}
+
+/* ── SI/NO BUTTONS ── */
+.sino-btn{padding:6px 18px;border-radius:6px;font-size:13px;font-weight:700;cursor:pointer;border:1.5px solid var(--border);background:#fff;color:var(--muted);transition:.15s}
+.sino-btn.selected{background:#fef9c3;border-color:#ca8a04;color:#92400e}
+/* ── DRAG & DROP ── */
+.pzone.dragover{background:#dbeafe;border:2px dashed var(--blue2);transform:scale(1.02)}
+.pslot.dragover{border-color:var(--blue2)}
+
+/* ── LANDING ── */
+.landing{position:fixed;inset:0;z-index:9999;background:var(--bg);display:flex;flex-direction:column;align-items:center;justify-content:center;padding:24px}
+.landing-logo{height:60px;background:#fff;border-radius:12px;padding:8px 16px;margin-bottom:20px;box-shadow:var(--sh)}
+.landing h1{font-size:1.4rem;font-weight:800;color:var(--blue);margin-bottom:6px;text-align:center}
+.landing p{font-size:.88rem;color:var(--muted);margin-bottom:32px;text-align:center}
+.landing-cards{display:grid;grid-template-columns:1fr 1fr 1fr;gap:20px;max-width:900px;width:100%}
+.lcard{background:#fff;border-radius:14px;box-shadow:var(--sh);padding:28px 22px;cursor:pointer;border:2px solid transparent;transition:all .2s;text-align:center}
+.lcard:hover{border-color:var(--blue);transform:translateY(-3px);box-shadow:0 8px 24px rgba(26,58,92,.15)}
+.lcard svg{width:48px;height:48px;color:var(--blue);margin-bottom:14px}
+.lcard h2{font-size:1rem;font-weight:700;color:var(--blue);margin-bottom:6px}
+.lcard p{font-size:.78rem;color:var(--muted);line-height:1.4}
+@media(max-width:500px){.landing-cards{grid-template-columns:1fr}}
+
+/* ── GIS FORM ── */
+#gis-app{display:none}
+</style>
+</head>
+<body>
+<!-- ═══ LANDING ═══════════════════════════════════════════════════ -->
+<div class="landing" id="landing">
+  <img class="landing-logo" src="data:image/png;base64,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" alt="TELCONET">
+  <h1>Sistema de Informes TELCONET</h1>
+  <p>Selecciona el tipo de informe que deseas generar</p>
+  <div class="landing-cards">
+    <div class="lcard" onclick="selectForm('pozos')">
+      <svg fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="1.5">
+        <path d="M12 2C8.13 2 5 5.13 5 9c0 5.25 7 13 7 13s7-7.75 7-13c0-3.87-3.13-7-7-7z"/>
+        <circle cx="12" cy="9" r="2.5"/>
+      </svg>
+      <h2>Inspección de Pozos</h2>
+      <p>Informe de inspección de pozos inspeccionados con fotos y coordenadas GPS</p>
+    </div>
+    <div class="lcard" onclick="selectForm('gis')">
+      <svg fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="1.5">
+        <rect x="2" y="3" width="20" height="14" rx="2"/>
+        <path d="M8 21h8M12 17v4"/>
+        <path d="M7 8h.01M7 12h10M7 16h10"/>
+      </svg>
+      <h2>Informe GIS</h2>
+      <p>Formulario de instalación GIS con materiales, descripción fotográfica y conclusiones</p>
+    </div>
+    <div class="lcard" onclick="selectForm('opu')">
+      <svg fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="1.5">
+        <path d="M9 11l3 3L22 4"/>
+        <path d="M21 12v7a2 2 0 01-2 2H5a2 2 0 01-2-2V5a2 2 0 012-2h11"/>
+      </svg>
+      <h2>Informe OPU</h2>
+      <p>Formulario OPU con materiales, preguntas SI/NO, firma del técnico y cliente</p>
+    </div>
+  </div>
+</div>
+
+<div class="pdfov" id="pdfOv"><div class="spin"></div><p>Generando PDF, por favor espere...</p></div>
+<div class="ov" id="confirmOv">
+  <div class="dlg">
+    <h3>&#9888; Limpiar formulario</h3>
+    <p>Esta acción eliminará todos los datos ingresados y no se puede deshacer.</p>
+    <div class="dlg-btns">
+      <button class="btn btn-ghost btn-sm" onclick="closeConfirm()">Cancelar</button>
+      <button class="btn btn-danger btn-sm" onclick="doClear()">Sí, limpiar</button>
+    </div>
+  </div>
+</div>
+<header class="app-header" id="pozos-header" style="display:none">
+  <div class="hinner">
+    <div class="logo-area">
+      <img class="logo-img" src="data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAOQAAACGCAYAAADNaybcAAAIQUlEQVR4Xu2dQbLkNAyG3wO2rGBNFTeAO1DFSTgVJ6GKI7DgAmxYw4otMJTf4MG4bEtW0omk/mY5L3HkX/8XyU53+vWFfyiAAm4UeHUTCYGgAAq8ACQmQAFHCgCko2QQCgoAJB5AAUcKAKSjZBAKCgAkHkABRwoApKNkEAoKACQeQAFHCgCko2QQCgoAJB5AAUcKAKSjZBAKCgAkHkABRwoApKNkEAoKACQeQAFHCgCko2QQCgoAJB5AAUcKAKSjZBAKCgAkHkABRwoApKNkEAoKACQeQAFHCgCko2QQCgoAJB5AAUcKAKSjZBAKCgAkHkABRwoApKNkEAoKACQeQAFHCgCko2QQCgoAJB5AAUcKAKSjZBAKCgAkHkABRwoApKNkEAoKACQeQAFHCgCko2QQCgoAJB5AAUcKAKSjZBAKCgAkHkABRwoApKNkEAoKACQeQAFHCgCko2QQiqzAJ9989+7PH79P69u0E5NTyxHRFCgw1pizQgmQ0Vz5hPG2IALkExqAKftQYARiiUyqjpErKRXSh/eIolNgBuMMSCu83oQHSG8ZefJ4ViD27erOsVFkBcgomUoepwauIsG73359ef38C5UaUmurGuTigwDyYsG53P8V0IBYIGz/ASQuQoEHKLCCsYcQIB+QAIZEgaLADMQVhLtAtu2qpgq349/Z6tKywshlCozA0EL47o/fP8T5+ulnYszatnY0EECK8nJAdAV6GLUgvm3kPAmMZa5UyOhOdx7/0fYUIJ0nmPBiKCCt2zxWyDtb1ZpVKmQMf4eL8i4grWtHDzDSsoazeZyAJSDfWtHu+eJsdjtrSAuQXmAEyDj+DhmpBOXZQEaHESBD2jxO0N6B9FQZWUPG8XXoSK2fxqmTfmS7CpChrUXwFgWOVkktkLvtqkcYaVktDuOcbQWOVMlHAOkVRoDcthYnWBR4NJA71dEzjABpcRfnmBSwfmJHUyG1QHqHESBN1uIkiwLWKgmQFrU5BwUUCliqpARkpupIhVSYiEPOU+AIkLOvXGmAjNCq8hzyPJ8x0oYCu9+JrBVyBGQ2GKmQG0bi0PMU2IHyCJCRKuOyQn781bcfXtluScNfP//wah1jdm75f0ss7TklprPGKePujDXSQ3N+f149x6LvkXOrjpqYpTxdAWREGKcV0pLsNglegNTMQ2MwzTgSoLMxpOtnBLJopX2DwKxCSu0qQDZE3g2kFqD+JjK6s++ONQNsNc4KSoB8/y6dfg25AjIqjCkr5C5AKyitY40Ak8bSgnyk7Txy7pktax1LUyVHFTIrjNubOrO7tbaySO1ZHees9Za0lun/3sYnASSN3c9VM54G5BlUWm1ncVs1l3RY/V0CcvYMcgZk5Mq43NTRJm2n1ZLWWP3mywoWbXzSXb01oQZGbRUbXRcgx1lroey/sLyzfswAY6oKeeYd3jKWdM6ou5DOKQnSriEjVsgyv10gR9UxC4wAObhpayDZqdCrFlOz85odyBWU2vUjQP7ryN2WdbWekFpGqQLsrG9XcVwJ5KgC9u2uFkhpLber384SQ7q29PdZldQAmQnGyytkdiCtLebqJvAMQLZVsl1H9kD27Wo2GAHy5pZVs5EFkP89g2yBzAjj5UBKbVM1qKVttJwzqthHxrFUutWcR/FleuzRz6+2rrVKthXyGWAEyEkPbYXyCJCr9WQb5rMBWT+hU4HMWhlrjrc+sL2zcWI19cyYmupquWY5R/sQf3cTa7VRtftMU7vZI22gWHaIrWNazitVsq2QALlQMSKQvZEtO5u9JNqPoFmAlCpl5gpZda5Qlpa1APks1fHyllVzxyyG03yqxQrJkZ1eTfyjG8AIst1qK1VITWy719R0JZrr7h4zAjJ7q3pLy6pJzFEgpQozi0HzOVJN/OUYzViS2aUPDRy5aY3mYWn3tXpYjivxlAr50ZdfvzwLjCkrZE3+jmGtcMyqtMbw0jVnNxZtuzyKIUqFrHMvQP79y09b+xwW+D2dszXZo2tIzcTPqJD9dc66+0tVazW/He3acc56Djmr3KsbmOamockpx+gV2AJSPyxHosC5CvRf1craxgLkub5htBMUqPD10I3exZMNTIA8wUAMcZ4Cs3e3FvBWfzsvgntHAsh79efqAwWkFyrzxgBsgwIXKiAB2YaS7QvLVMgLjcaldArsALmCM+L6EiB1HuGoixWwQlnDjPrtEIC82GhcTqfAUSCjggmQOn9w1MUKnAVkCTvSmwYA8mKjcTm9Aju/AbIaNdLGD0Dq/cGRFysAkBcLzuVQQFJAeru5dH6k6vjWXksT4u8ocKcCR6skQN6ZPa6dToGzgfT+bJIKmc7C+SZ0pG2NtMNKy5rPuylnZAUyGowAmdK+OSe1+lGe2YwBMqcXmJUDBSxVEiAdJI4QcipwFEjvmzk1a2zq5PRvylnttK0RqyNryJS2zTspK5BRqiNA5vVu2pn1P8ij2dAByLR2YGJ3K6CtklF/foA15N0O4/pbCmiAjPrlZFrWLStwsBcFpLY1anUESC8OI44tBQBySy4ORoHHK9D+jmR/tVIhI23ktPGzhny8d7jCAxSYVcnI7Sot6wOMwpDXKACQ1+jMVVBArcCobY3crlIh1annQI8KAKTHrBDTUyvQ/n5m9OpIhXxqK+eYfFslATJHTplFYAVaIDP84jOPPQKbkdDfK1DbVoDEESjgQIECZAYYWUM6MBMhoECrAC0rfkABRwoApKNkEAoKACQeQAFHCgCko2QQCgoAJB5AAUcKAKSjZBAKCgAkHkABRwoApKNkEAoKACQeQAFHCgCko2QQCgoAJB5AAUcK/AMLg4zSQIHxKwAAAABJRU5ErkJggg==" alt="TELCONET S.A.">
+      <div class="logo-text"><h1>TELCONET S.A.</h1><span>Infraestructura &amp; Telecomunicaciones</span></div>
+    </div>
+    <div class="hbtns">
+      <button class="btn btn-outline btn-sm" onclick="volverMenu(this)" style="display:inline-flex;align-items:center;gap:6px">
+        <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M3 9l9-7 9 7v11a2 2 0 01-2 2H5a2 2 0 01-2-2z"/><polyline points="9 22 9 12 15 12 15 22"/></svg>
+        Menú
+      </button>
+      <button class="btn btn-outline btn-sm" onclick="saveDraft()">
+        <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M19 21H5a2 2 0 01-2-2V5a2 2 0 012-2h11l5 5v11a2 2 0 01-2 2z"/><polyline points="17 21 17 13 7 13 7 21"/><polyline points="7 3 7 8 15 8"/></svg>
+        Guardar
+      </button>
+      <button class="btn btn-outline btn-sm" onclick="confirmClear()">
+        <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><polyline points="3 6 5 6 21 6"/><path d="M19 6l-1 14H6L5 6"/><path d="M10 11v6M14 11v6"/></svg>
+        Limpiar
+      </button>
+      <button class="btn btn-red" onclick="generatePDF()">
+        <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M14 2H6a2 2 0 00-2 2v16a2 2 0 002 2h12a2 2 0 002-2V8z"/><polyline points="14 2 14 8 20 8"/><line x1="9" y1="13" x2="15" y2="13"/></svg>
+        Generar PDF
+      </button>
+    </div>
+  </div>
+</header>
+<div class="wrap" id="pozos-wrap" style="display:none">
+  <div class="sbar">
+    <div class="sinfo"><div class="sdot" id="sdot"></div><span id="stxt">Sin cambios guardados</span></div>
+    <div style="display:flex;gap:8px;align-items:center">
+      <button class="btn btn-ghost btn-sm" onclick="loadDraft()">
+        <svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><polyline points="1 4 1 10 7 10"/><path d="M3.51 15a9 9 0 102.13-9.36L1 10"/></svg>
+        Recuperar borrador
+      </button>
+      <span id="lsaved" style="font-size:11.5px;color:var(--muted)"></span>
+    </div>
+  </div>
+  <!-- S1: Encabezado -->
+  <div class="card">
+    <div class="card-head"><span class="sec-n">1</span><h2>Encabezado</h2></div>
+    <div class="card-body">
+      <div class="g2">
+        <div class="fg"><label>Tarea <span class="req">*</span></label><input id="s1_tarea" class="fi" placeholder="Descripción de la tarea"></div>
+        <div class="fg"><label>Entidad</label><input id="s1_entidad" class="fi" value="CNT" placeholder="Entidad"></div>
+      </div>
+      <div class="g2">
+        <div class="fg"><label>Realizado por <span class="req">*</span></label><input id="s1_realizado" class="fi" placeholder="Nombre completo"></div>
+        <div class="fg"><label>Cargo</label><input id="s1_cargo" class="fi" placeholder="Cargo del responsable"></div>
+      </div>
+      <div class="g2">
+        <div class="fg"><label>Fecha <span class="req">*</span></label><input id="s1_fecha" type="date" class="fi"></div>
+        <div class="fg"><label>Departamento</label><input id="s1_dpto" class="fi" placeholder="Departamento o área"></div>
+      </div>
+    </div>
+  </div>
+  <!-- S2: Datos Generales -->
+  <div class="card">
+    <div class="card-head"><span class="sec-n">2</span><h2>Datos Generales del Proyecto</h2></div>
+    <div class="card-body">
+      <div class="g1"><div class="fg"><label>Nombre del Proyecto <span class="req">*</span></label><input id="s2_proyecto" class="fi" placeholder="Nombre del proyecto"></div></div>
+      <div class="g2">
+        <div class="fg"><label>Parroquia</label><input id="s2_parroquia" class="fi" placeholder="Parroquia"></div>
+        <div class="fg"><label>Ciudad / Cantón</label><input id="s2_ciudad" class="fi" placeholder="Ciudad o cantón"></div>
+      </div>
+      <div class="g1"><div class="fg"><label>Dirección / Referencia</label><input id="s2_dir" class="fi" placeholder="Dirección o punto de referencia"></div></div>
+    </div>
+  </div>
+  <!-- S3: Tabla Pozos -->
+  <div class="card">
+    <div class="card-head"><span class="sec-n">3</span><h2>Tabla de Pozos Inspeccionados</h2></div>
+    <div class="card-body">
+      <div class="twrap">
+        <table class="pt">
+          <thead><tr>
+            <th>Item</th>
+            <th style="min-width:115px">Código de Pozo</th>
+            <th style="min-width:150px">Dirección / Ruta</th>
+            <th style="min-width:145px">Coordenadas</th>
+            <th style="min-width:85px">Estado</th>
+            <th style="min-width:85px">Autorizado</th>
+            <th style="width:32px"></th>
+          </tr></thead>
+          <tbody id="tBody"></tbody>
+        </table>
+      </div>
+      <button class="btn btn-ghost btn-sm" onclick="addRow()" style="margin-top:6px">
+        <svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg>
+        Agregar fila
+      </button>
+    </div>
+  </div>
+  <!-- S4: Fotos -->
+  <div class="card">
+    <div class="card-head"><span class="sec-n">4</span><h2>Archivo Fotográfico</h2></div>
+    <div class="card-body"><div class="pgrid" id="photoGrid"></div></div>
+  </div>
+  <!-- S5: Observaciones -->
+  <div class="card">
+    <div class="card-head"><span class="sec-n">5</span><h2>Observaciones</h2></div>
+    <div class="card-body"><textarea id="s5_obs" class="fi" rows="5" placeholder="Detalle las observaciones encontradas durante la inspección..."></textarea></div>
+  </div>
+  <!-- S6: Recomendaciones -->
+  <div class="card">
+    <div class="card-head"><span class="sec-n">6</span><h2>Recomendaciones</h2></div>
+    <div class="card-body"><textarea id="s6_rec" class="fi" rows="5" placeholder="Indique las recomendaciones técnicas a implementar..."></textarea></div>
+  </div>
+  <div style="display:flex;gap:10px;justify-content:flex-end;flex-wrap:wrap;margin-top:4px">
+    <button class="btn btn-ghost" onclick="confirmClear()">Limpiar formulario</button>
+    <button class="btn btn-success" onclick="saveDraft()">Guardar borrador</button>
+    <button class="btn btn-red" onclick="generatePDF()">
+      <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M14 2H6a2 2 0 00-2 2v16a2 2 0 002 2h12a2 2 0 002-2V8z"/><polyline points="14 2 14 8 20 8"/></svg>
+      Generar PDF
+    </button>
+  </div>
+</div>
+<div class="toast-c" id="toastC"></div>
+<input type="file" id="photoIn" accept="image/*" style="display:none">
+<script>
+// Global state - declared at top level
+var opuSiNo = ['','','','','',''];
+var gisPhotos = []; // array of {img: base64|null, desc: string}
+// Dynamic server URL - works from any device on the same network
+var SERVER = window.location.origin;
+
+const LOGO_B64='data:image/png;base64,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';
+const FOOTER_B64='data:image/png;base64,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';
+const BLUE=[26,58,92],BLUE2=[37,99,168],BORDER=[180,195,215],DARK=[20,30,50],MUTED=[100,116,139],WHITE=[255,255,255],GRAY=[240,244,248],GRN=[22,163,74],RED_C=[220,38,38];
+const SK='telconet_pozos_v3';
+let photos=[],isDirty=false,rowCount=10;
+
+document.addEventListener('DOMContentLoaded',()=>{initTable();syncPhotoSlots();setToday();attachDirty();autoLoad();});
+
+function setToday(){const el=document.getElementById('s1_fecha');if(el&&!el.value)el.value=new Date().toISOString().split('T')[0];}
+function attachDirty(){document.querySelectorAll('.fi').forEach(el=>{el.addEventListener('input',markDirty);el.addEventListener('change',markDirty);});}
+
+// TABLE
+function initTable(data){var tb=document.getElementById('tBody');tb.innerHTML='';rowCount=Math.max(data&&data.length?data.length:10,10);for(var i=0;i<rowCount;i++)addRowDOM(i+1,data?data[i]:null);syncPhotoSlots();}
+function addRow(){rowCount++;addRowDOM(rowCount,null);markDirty();const rows=document.querySelectorAll('#tBody tr');rows[rows.length-1].querySelector('input').focus();}
+function addRowDOM(n,d){
+  const tr=document.createElement('tr');
+  const e=d&&d.estado||'',a=d&&d.autor||'';
+  tr.innerHTML='<td>'+n+'</td>'+
+    '<td><input type="text" placeholder="PZ-000" value="'+esc(d&&d.codigo||'')+'" oninput="markDirty()"></td>'+
+    '<td><input type="text" placeholder="Calle / Ruta" value="'+esc(d&&d.dir||'')+'" oninput="markDirty()"></td>'+
+    '<td><div style="display:flex;gap:4px;align-items:center"><input type="text" style="min-width:0;flex:1" placeholder="-0.0000, -78.0000" value="'+esc(d&&d.coords||'')+'" oninput="markDirty()"><button type="button" class="btn-gps" onclick="getGPS(this)" title="Obtener ubicaci\u00f3n GPS">&#128205;</button></div></td>'+
+    '<td><select onchange="markDirty()"><option value="">—</option>'+
+    '<option value="Bueno"'+(e==='Bueno'?' selected':'')+'>Bueno</option>'+
+    '<option value="Regular"'+(e==='Regular'?' selected':'')+'>Regular</option>'+
+    '<option value="Malo"'+(e==='Malo'?' selected':'')+'>Malo</option></select></td>'+
+    '<td><select onchange="markDirty()"><option value="">—</option>'+
+    '<option value="Sí"'+(a==='Sí'?' selected':'')+'>Sí</option>'+
+    '<option value="No"'+(a==='No'?' selected':'')+'>No</option></select></td>'+
+    '<td style="text-align:center"><button class="btn btn-xs" style="background:#fef2f2;color:#dc2626;border:1px solid #fecaca" onclick="removeRow(this)">&#10005;</button></td>';
+  document.getElementById('tBody').appendChild(tr);
+  // Sync fotos cuando cambia dato del pozo
+  Array.from(tr.querySelectorAll('input,select')).forEach(function(el){
+    el.addEventListener('change',function(){syncPhotoSlots();markDirty();});
+    el.addEventListener('input',function(){syncPhotoSlots();markDirty();});
+  });
+}
+function removeRow(btn){const tb=document.getElementById('tBody');if(tb.querySelectorAll('tr').length<=1){toast('Debe quedar al menos una fila','err');return;}btn.closest('tr').remove();renumber();markDirty();}
+function renumber(){document.querySelectorAll('#tBody tr').forEach((tr,i)=>tr.cells[0].textContent=i+1);rowCount=document.querySelectorAll('#tBody tr').length;}
+
+function getGPS(btn){
+  if(!navigator.geolocation){toast('GPS no disponible en este navegador','err');return;}
+  // inp = campo Coordenadas; dirInp = campo Dirección/Ruta (anterior td)
+  var coordInp=btn.previousElementSibling;
+  var row=btn.closest('tr');
+  var allInp=row.querySelectorAll('input');
+  var dirInp=allInp[1]; // índice 1 = Dirección / Ruta
+
+  btn.innerHTML='&#9203;';btn.disabled=true;
+
+  navigator.geolocation.getCurrentPosition(
+    function(pos){
+      var lat=pos.coords.latitude.toFixed(6);
+      var lon=pos.coords.longitude.toFixed(6);
+
+      // Paso 1: llenar coordenadas
+      coordInp.value=lat+', '+lon;
+      coordInp.dispatchEvent(new Event('input'));
+
+      // Paso 2: geocodificación inversa con Nominatim
+      var url='https://nominatim.openstreetmap.org/reverse?format=json&lat='+lat+'&lon='+lon+'&zoom=18&addressdetails=1';
+      fetch(url,{headers:{'User-Agent':'TelconetInspectorApp/1.0','Accept-Language':'es'}})
+        .then(function(r){return r.json();})
+        .then(function(data){
+          var a=data.address||{};
+          var road=a.road||a.pedestrian||a.footway||a.street||'';
+          var num=a.house_number||'';
+          var suburb=a.suburb||a.neighbourhood||a.quarter||'';
+          var city=a.city||a.town||a.village||a.municipality||'';
+          var parts=[];
+          if(road){parts.push(road+(num?' '+num:''));}
+          if(suburb)parts.push(suburb);
+          if(city)parts.push(city);
+          var dir=parts.join(', ');
+          if(dir&&dirInp){
+            dirInp.value=dir;
+            dirInp.dispatchEvent(new Event('input'));
+          }
+          btn.innerHTML='<span style="color:#16a34a;font-weight:700">&#10003;</span>';
+          btn.disabled=false;
+          setTimeout(function(){btn.innerHTML='&#128205;';},1800);
+          toast('Ubicaci\u00f3n y direcci\u00f3n obtenidas','ok');
+        })
+        .catch(function(){
+          btn.innerHTML='<span style="color:#16a34a;font-weight:700">&#10003;</span>';
+          btn.disabled=false;
+          setTimeout(function(){btn.innerHTML='&#128205;';},1800);
+          toast('Coordenadas obtenidas. No se pudo obtener direcci\u00f3n, ingrese manualmente','inf');
+        });
+    },
+    function(err){
+      btn.innerHTML='<span style="color:#dc2626;font-weight:700">&#10007;</span>';
+      btn.disabled=false;
+      setTimeout(function(){btn.innerHTML='&#128205;';},1800);
+      toast('No se pudo obtener ubicaci\u00f3n, ingrese manualmente','err');
+    },
+    {timeout:12000,enableHighAccuracy:true,maximumAge:0}
+  );
+}
+function getPozos(){return Array.from(document.querySelectorAll('#tBody tr')).map(tr=>{const inp=tr.querySelectorAll('input'),sel=tr.querySelectorAll('select');return{codigo:inp[0].value||'',dir:inp[1].value||'',coords:inp[2].value||'',estado:sel[0].value||'',autor:sel[1].value||''};});}
+
+// PHOTOS — dinámicas por tabla de pozos
+function getActiveWells(){
+  return Array.from(document.querySelectorAll('#tBody tr')).filter(function(tr){
+    var inp=tr.querySelectorAll('input');
+    return (inp[0]&&inp[0].value.trim())||(inp[1]&&inp[1].value.trim());
+  });
+}
+function syncPhotoSlots(){
+  var active=getActiveWells();
+  var n=active.length;
+  // Extender array si hay más pozos que antes
+  while(photos.length<n)photos.push(null);
+  var grid=document.getElementById('photoGrid');
+  grid.innerHTML='';
+  if(n===0){
+    grid.innerHTML='<div style="grid-column:1/-1;color:var(--muted);font-size:13px;padding:16px 4px">Ingrese datos en la tabla de pozos para habilitar las ranuras fotográficas.</div>';
+    return;
+  }
+  for(var i=0;i<n;i++){
+    var inp=active[i].querySelectorAll('input');
+    var wCode=inp[0]?inp[0].value.trim():'';
+    var wCoords=inp[2]?inp[2].value.trim():'';
+    grid.appendChild(buildSlot(i,wCode,wCoords));
+  }
+}
+function buildSlot(i,wCode,wCoords){
+  var d=document.createElement('div');
+  d.className='pslot'+(photos[i]?' has-img':'');d.id='slot_'+i;
+  var label='Fig '+(i+1)+(wCode?' — '+wCode:'');
+  var rmBtn=photos[i]?'<button class="btn btn-xs" style="background:rgba(255,255,255,.15);color:#fff;border:1px solid rgba(255,255,255,.25)" onclick="removePhoto('+i+')">&#10005;</button>':'';
+  var imgArea=photos[i]
+    ?'<div class="ppreview"><img src="'+photos[i]+'" alt="Fig '+(i+1)+'"><button class="prm" onclick="removePhoto('+i+')">&#10005;</button></div>'
+    :'<div class="pzone" onclick="triggerPhoto('+i+')"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><path d="M21 15v4a2 2 0 01-2 2H5a2 2 0 01-2-2v-4"/><polyline points="17 8 12 3 7 8"/><line x1="12" y1="3" x2="12" y2="15"/></svg><p><strong>Clic o arrastra foto aquí</strong><br>Cámara o galería</p></div>';
+  var coordsDiv='<div class="pcoords"><label>Coordenadas GPS</label><div class="pcoord-val">'+(wCoords?wCoords:'<span style="color:#94a3b8;font-style:italic">Sin coordenadas (ingresar en tabla de pozos)</span>')+'</div></div>';
+  d.innerHTML='<div class="phead"><span>&#128247; '+label+'</span>'+rmBtn+'</div>'+imgArea+coordsDiv;
+  // Drag & drop
+  d.addEventListener('dragover',  function(e){ e.preventDefault(); d.classList.add('dragover'); });
+  d.addEventListener('dragleave', function(e){ d.classList.remove('dragover'); });
+  d.addEventListener('drop', function(e){
+    e.preventDefault(); d.classList.remove('dragover');
+    var file = e.dataTransfer.files[0];
+    if (!file || !file.type.startsWith('image/')) return;
+    compress(file, 1000, function(b64){ photos[i]=b64; syncPhotoSlots(); markDirty(); });
+  });
+  return d;
+}
+function triggerPhoto(idx){var inp=document.getElementById('photoIn');inp.onchange=function(e){handlePhoto(e,idx);};inp.click();}
+function handlePhoto(e,idx){var file=e.target.files[0];if(!file)return;compress(file,1000,function(b64){photos[idx]=b64;syncPhotoSlots();markDirty();});e.target.value='';}
+function removePhoto(idx){photos[idx]=null;syncPhotoSlots();markDirty();}
+function compress(file,maxW,cb){var r=new FileReader();r.onload=function(e){var img=new Image();img.onload=function(){var c=document.createElement('canvas');var w=img.width,h=img.height;if(w>maxW){h=Math.round(h*maxW/w);w=maxW;}c.width=w;c.height=h;c.getContext('2d').drawImage(img,0,0,w,h);cb(c.toDataURL('image/jpeg',0.82));};img.src=e.target.result;};r.readAsDataURL(file);}
+
+// DRAFT
+const gv=id=>(document.getElementById(id)&&document.getElementById(id).value||'').trim();
+function getFormData(){return{s1:{tarea:gv('s1_tarea'),entidad:gv('s1_entidad'),realizado:gv('s1_realizado'),cargo:gv('s1_cargo'),fecha:gv('s1_fecha'),dpto:gv('s1_dpto')},s2:{proyecto:gv('s2_proyecto'),parroquia:gv('s2_parroquia'),ciudad:gv('s2_ciudad'),dir:gv('s2_dir')},s3:getPozos(),photos:photos.slice(),s5:gv('s5_obs'),s6:gv('s6_rec'),savedAt:new Date().toISOString()};}
+function saveDraft(){const d=getFormData();localStorage.setItem(SK,JSON.stringify(d));isDirty=false;updateStatus(true,d.savedAt);toast('Borrador guardado','ok');}
+function loadDraft(){const raw=localStorage.getItem(SK);if(!raw){toast('No hay borrador guardado','inf');return;}applyDraft(JSON.parse(raw));toast('Borrador recuperado','ok');}
+function autoLoad(){const raw=localStorage.getItem(SK);if(!raw)return;const d=JSON.parse(raw);applyDraft(d);if(d.savedAt)document.getElementById('lsaved').textContent='Guardado: '+new Date(d.savedAt).toLocaleString('es-ES');}
+function applyDraft(d){
+  const sv=(id,v)=>{const el=document.getElementById(id);if(el)el.value=v||'';};
+  sv('s1_tarea',d.s1&&d.s1.tarea);sv('s1_entidad',(d.s1&&d.s1.entidad)||'CNT');
+  sv('s1_realizado',d.s1&&d.s1.realizado);sv('s1_cargo',d.s1&&d.s1.cargo);
+  sv('s1_fecha',d.s1&&d.s1.fecha);sv('s1_dpto',d.s1&&d.s1.dpto);
+  sv('s2_proyecto',d.s2&&d.s2.proyecto);sv('s2_parroquia',d.s2&&d.s2.parroquia);
+  sv('s2_ciudad',d.s2&&d.s2.ciudad);sv('s2_dir',d.s2&&d.s2.dir);
+  sv('s5_obs',d.s5);sv('s6_rec',d.s6);
+  photos=[].concat(d.photos||[]);
+  initTable(d.s3);syncPhotoSlots();isDirty=false;updateStatus(true,d.savedAt);
+}
+function confirmClear(){document.getElementById('confirmOv').classList.add('open');}
+function closeConfirm(){document.getElementById('confirmOv').classList.remove('open');}
+function doClear(){closeConfirm();photos=[];document.querySelectorAll('.fi').forEach(el=>{if(el.tagName==='SELECT')el.selectedIndex=0;else el.value='';});document.getElementById('s1_entidad').value='CNT';setToday();initTable();syncPhotoSlots();isDirty=false;updateStatus(false);toast('Formulario limpiado','inf');}
+function markDirty(){if(!isDirty){isDirty=true;document.getElementById('sdot').className='sdot dirty';document.getElementById('stxt').textContent='Cambios sin guardar';}}
+function updateStatus(saved,ts){const dot=document.getElementById('sdot'),txt=document.getElementById('stxt'),ls=document.getElementById('lsaved');if(saved){dot.className='sdot saved';txt.textContent='Borrador guardado';if(ts)ls.textContent='Guardado: '+new Date(ts).toLocaleString('es-ES');}else{dot.className='sdot';txt.textContent='Sin cambios guardados';ls.textContent='';}}
+
+// PDF
+function generatePDF(){
+  if(!gv('s1_tarea')||!gv('s1_realizado')||!gv('s1_fecha')){toast('Complete los campos requeridos: Tarea, Realizado por y Fecha','err');return;}
+  showPreview();
+}
+function generatePDFDirect(){
+  document.getElementById('pdfOv').classList.add('show');
+  document.querySelector('#pdfOv p').textContent = 'Generando PDF, por favor espere...';
+
+  var data = {
+    tarea:     gv('s1_tarea'),
+    entidad:   gv('s1_entidad'),
+    realizado: gv('s1_realizado'),
+    cargo:     gv('s1_cargo'),
+    fecha:     fmtDate(gv('s1_fecha')),
+    dpto:      gv('s1_dpto'),
+    proyecto:  gv('s2_proyecto'),
+    parroquia: gv('s2_parroquia'),
+    ciudad:    gv('s2_ciudad'),
+    dir:       gv('s2_dir'),
+    obs:       gv('s5_obs'),
+    rec:       gv('s6_rec'),
+    wells:     getPozos().filter(function(w){return w.codigo||w.dir||w.coords;}),
+    fotos:     (function(){
+      var active = getActiveWells();
+      return photos.map(function(img, i){
+        var coords = '';
+        if(active[i]){
+          var inp = active[i].querySelectorAll('input');
+          coords = inp[2] ? inp[2].value.trim() : '';
+        }
+        return { img: img||'', coords: coords };
+      }).filter(function(f, i){ return active[i]; });
+    })()
+  };
+
+  fetch(SERVER+'/generar-pdf', {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify(data)
+  })
+  .then(function(r){ return r.json(); })
+  .then(function(res){
+    document.getElementById('pdfOv').classList.remove('show');
+    if(res.error){
+      toast('Error: ' + res.error, 'err');
+      return;
+    }
+    // Download file
+    var byteStr = atob(res.file);
+    var ab = new ArrayBuffer(byteStr.length);
+    var ia = new Uint8Array(ab);
+    for(var i=0;i<byteStr.length;i++) ia[i]=byteStr.charCodeAt(i);
+    var blob = new Blob([ab], {type: res.mime});
+    var url  = URL.createObjectURL(blob);
+    var a    = document.createElement('a');
+    a.href   = url;
+    a.download = res.filename;
+    document.body.appendChild(a);
+    a.click();
+    document.body.removeChild(a);
+    URL.revokeObjectURL(url);
+    if(res.warning) toast(res.warning, 'inf');
+    else toast('Generado: ' + res.filename, 'ok');
+  })
+  .catch(function(err){
+    document.getElementById('pdfOv').classList.remove('show');
+    toast('No se pudo conectar al servidor. Asegúrate de ejecutar server.py', 'err');
+    console.error(err);
+  });
+}
+function showPreview(){
+  var active=getActiveWells();
+  var pozos=getPozos().filter(function(r){return r.codigo||r.dir||r.coords||r.estado||r.autor;});
+  var vFotos=photos.map(function(p,i){
+    var wc='';if(active[i]){var inp=active[i].querySelectorAll('input');wc=inp[2]?inp[2].value.trim():'';}
+    return{img:p,fig:i+1,coords:wc};
+  }).filter(function(f){return f.img;});
+
+  function sec(num,title,content){
+    return '<div class="prev-sec">'+
+      '<div class="prev-sec-head">'+num+'. '+title.toUpperCase()+'</div>'+
+      '<div class="prev-sec-body">'+content+'</div>'+
+    '</div>';
+  }
+  function fld(label,val){
+    var display=val
+      ?'<span class="prev-val">'+esc(val)+'</span>'
+      :'<span class="prev-empty">(sin datos)</span>';
+    return '<div class="prev-field"><span class="prev-lbl">'+label+'</span>'+display+'</div>';
+  }
+  function cell(v,st){
+    return '<td'+(st?' style="'+st+'"':'')+'>'+
+      (v?esc(v):'<span class="prev-empty">—</span>')+
+    '</td>';
+  }
+
+  var out='';
+
+  // S1
+  out+=sec(1,'Encabezado',
+    '<div class="prev-fields">'+
+    fld('TAREA',gv('s1_tarea'))+
+    fld('ENTIDAD',gv('s1_entidad'))+
+    fld('REALIZADO POR',gv('s1_realizado'))+
+    fld('CARGO',gv('s1_cargo'))+
+    fld('FECHA',fmtDate(gv('s1_fecha')))+
+    fld('DEPARTAMENTO',gv('s1_dpto'))+
+    '</div>'
+  );
+
+  // S2
+  out+=sec(2,'Datos del Proyecto',
+    '<div class="prev-fields">'+
+    fld('NOMBRE DEL PROYECTO',gv('s2_proyecto'))+
+    fld('PARROQUIA',gv('s2_parroquia'))+
+    fld('CIUDAD / CANTÓN',gv('s2_ciudad'))+
+    fld('DIRECCIÓN / REFERENCIA',gv('s2_dir'))+
+    '</div>'
+  );
+
+  // S3
+  var s3body;
+  if(pozos.length===0){
+    s3body='<p class="prev-empty">(sin datos)</p>';
+  }else{
+    s3body='<div style="overflow-x:auto"><table class="prev-tbl">'+
+      '<thead><tr>'+
+      '<th style="width:36px;text-align:center">Item</th>'+
+      '<th>Cód. Pozo</th>'+
+      '<th>Dirección / Ruta</th>'+
+      '<th>Coordenadas</th>'+
+      '<th style="text-align:center">Estado</th>'+
+      '<th style="text-align:center">Autorizado</th>'+
+      '</tr></thead><tbody>';
+    pozos.forEach(function(r,i){
+      var ec=r.estado==='Bueno'?'color:#16a34a;font-weight:700':
+             r.estado==='Malo'?'color:#dc2626;font-weight:700':
+             r.estado==='Regular'?'color:#d97706;font-weight:700':'';
+      var ac=r.autor==='Sí'?'color:#16a34a;font-weight:700':
+             r.autor==='No'?'color:#dc2626;font-weight:700':'';
+      s3body+='<tr>'+
+        '<td style="text-align:center;font-weight:700;color:#64748b">'+(i+1)+'</td>'+
+        cell(r.codigo)+cell(r.dir)+cell(r.coords)+
+        cell(r.estado,'text-align:center;'+ec)+
+        cell(r.autor,'text-align:center;'+ac)+
+      '</tr>';
+    });
+    s3body+='</tbody></table></div>';
+  }
+  out+=sec(3,'Tabla de Pozos ('+pozos.length+' filas con datos)',s3body);
+
+  // S4
+  var s4body;
+  if(vFotos.length===0){
+    s4body='<p class="prev-empty">(sin datos) — Las fotos aparecen al subirlas en los slots de pozos</p>';
+  }else{
+    s4body='<div class="prev-photos">';
+    vFotos.forEach(function(f){
+      s4body+=
+        '<div class="prev-photo">'+
+          '<img src="'+f.img+'" alt="Fig '+f.fig+'">'+
+          '<div class="prev-photo-cap">'+
+            '<b>Fig '+f.fig+'.</b>'+
+            '<span>Coordenadas: '+(f.coords?esc(f.coords):'(sin datos)')+'</span>'+
+          '</div>'+
+        '</div>';
+    });
+    s4body+='</div>';
+  }
+  out+=sec(4,'Archivo Fotográfico ('+vFotos.length+' fotos)',s4body);
+
+  // S5
+  out+=sec(5,'Observaciones',
+    gv('s5_obs')
+      ?'<p class="prev-txt">'+esc(gv('s5_obs'))+'</p>'
+      :'<p class="prev-empty">(sin datos)</p>'
+  );
+
+  // S6
+  out+=sec(6,'Recomendaciones',
+    gv('s6_rec')
+      ?'<p class="prev-txt">'+esc(gv('s6_rec'))+'</p>'
+      :'<p class="prev-empty">(sin datos)</p>'
+  );
+
+  document.getElementById('prevBody').innerHTML=out;
+  document.getElementById('previewOv').classList.add('open');
+}
+function closePreview(){document.getElementById('previewOv').classList.remove('open');}
+
+function buildPDF(){
+  var jsPDF=window.jspdf.jsPDF;
+  var doc=new jsPDF({orientation:'p',unit:'mm',format:'a4'});
+  var W=210,H=297,M=14,CW=W-M*2,HDR=30,FTR=16,BOTTOM=H-FTR-7,y=0;
+
+  function drawHeader(){
+    doc.setFillColor(255,255,255);doc.rect(0,0,W,HDR,'F');
+    try{doc.addImage(LOGO_B64,'PNG',M,4,52,18);}catch(ex){}
+    doc.setTextColor(26,58,92);doc.setFontSize(12);doc.setFont('helvetica','bold');
+    doc.text('INFORME DE INSPECCIÓN DE POZOS',W-M,12,{align:'right'});
+    doc.setFontSize(8.5);doc.setFont('helvetica','normal');
+    doc.text('Fecha: '+fmtDate(gv('s1_fecha')),W-M,19,{align:'right'});
+    doc.setDrawColor(26,58,92);doc.setLineWidth(0.7);doc.line(M,HDR-2,W-M,HDR-2);
+    return HDR+4;
+  }
+
+  function drawFooter(page,total){
+    var fY=H-FTR;
+    doc.setFontSize(7);doc.setFont('helvetica','normal');doc.setTextColor(100,116,139);
+    doc.text('TELCONET S.A. — Informe de Inspección de Pozos',M,fY-2.5);
+    doc.text('Página '+page+' de '+total,W-M,fY-2.5,{align:'right'});
+    try{doc.addImage(FOOTER_B64,'PNG',0,fY,W,FTR);}catch(ex){}
+  }
+
+  function secBar(sy,n,title){
+    doc.setFillColor(26,58,92);doc.rect(M,sy,CW,8,'F');
+    doc.setTextColor(255,255,255);doc.setFontSize(9);doc.setFont('helvetica','bold');
+    doc.text(n+'.  '+title.toUpperCase(),M+4,sy+5.5);
+    return sy+9;
+  }
+
+  function infoTable(startY,rows){
+    var body=rows.map(function(r){
+      if(r.type==='single')return[{content:r.l,styles:{fillColor:[26,58,92],textColor:[255,255,255],fontStyle:'bold'}},{content:r.v||'',colSpan:3,styles:{fillColor:[255,255,255],textColor:[20,30,50]}}];
+      return[{content:r.l1,styles:{fillColor:[26,58,92],textColor:[255,255,255],fontStyle:'bold'}},{content:r.v1||'',styles:{fillColor:[255,255,255],textColor:[20,30,50]}},{content:r.l2,styles:{fillColor:[26,58,92],textColor:[255,255,255],fontStyle:'bold'}},{content:r.v2||'',styles:{fillColor:[255,255,255],textColor:[20,30,50]}}];
+    });
+    doc.autoTable({startY:startY,margin:{left:M,right:M},tableWidth:CW,theme:'plain',styles:{fontSize:9,cellPadding:{top:3.5,right:4,bottom:3.5,left:4},lineWidth:0.3,lineColor:[180,195,215],valign:'middle',overflow:'linebreak',minCellHeight:8},columnStyles:{0:{cellWidth:44},1:{cellWidth:47},2:{cellWidth:44},3:{cellWidth:47}},body:body});
+    return doc.lastAutoTable.finalY+5;
+  }
+
+  function textBlock(ty,text){
+    var lines=doc.splitTextToSize(text||'(Sin información)',CW-8);
+    var bh=lines.length*5+8;
+    doc.setFillColor(255,255,255);doc.setDrawColor(180,195,215);doc.setLineWidth(0.4);
+    doc.rect(M,ty,CW,bh,'FD');
+    doc.setTextColor(20,30,50);doc.setFontSize(9);doc.setFont('helvetica','normal');
+    doc.text(lines,M+4,ty+5.5,{lineHeightFactor:1.4});
+    return ty+bh+6;
+  }
+
+  function chk(need){if(y+need>BOTTOM){doc.addPage();y=drawHeader();}}
+
+  y=drawHeader();
+
+  chk(60);y=secBar(y,1,'Encabezado');
+  y=infoTable(y,[
+    {type:'single',l:'TAREA',v:gv('s1_tarea')},
+    {type:'single',l:'ENTIDAD',v:gv('s1_entidad')},
+    {type:'double',l1:'REALIZADO POR',v1:gv('s1_realizado'),l2:'CARGO',v2:gv('s1_cargo')},
+    {type:'double',l1:'FECHA',v1:fmtDate(gv('s1_fecha')),l2:'DEPARTAMENTO',v2:gv('s1_dpto')}
+  ]);
+
+  chk(55);y=secBar(y,2,'Datos Generales del Proyecto');
+  y=infoTable(y,[
+    {type:'single',l:'NOMBRE DEL PROYECTO',v:gv('s2_proyecto')},
+    {type:'double',l1:'PARROQUIA',v1:gv('s2_parroquia'),l2:'CIUDAD / CANTÓN',v2:gv('s2_ciudad')},
+    {type:'single',l:'DIRECCIÓN / REFERENCIA',v:gv('s2_dir')}
+  ]);
+
+  chk(30);y=secBar(y,3,'Tabla de Pozos Inspeccionados');
+  var pozos=getPozos();
+  doc.autoTable({
+    startY:y,margin:{left:M,right:M},tableWidth:CW,
+    head:[[{content:'Item',styles:{halign:'center'}},'Cód. Pozo','Dirección / Ruta','Coordenadas','Estado','Autorizado']],
+    body:pozos.map(function(r,i){return[
+      {content:String(i+1),styles:{halign:'center',fontStyle:'bold',textColor:[100,116,139]}},
+      r.codigo,r.dir,r.coords,
+      {content:r.estado,styles:{textColor:r.estado==='Bueno'?[22,163,74]:r.estado==='Malo'?[220,38,38]:[20,30,50],fontStyle:r.estado?'bold':'normal',halign:'center'}},
+      {content:r.autor,styles:{textColor:r.autor==='Sí'?[22,163,74]:r.autor==='No'?[220,38,38]:[20,30,50],fontStyle:r.autor?'bold':'normal',halign:'center'}}
+    ];}),
+    theme:'grid',
+    headStyles:{fillColor:[26,58,92],textColor:[255,255,255],fontStyle:'bold',fontSize:8.5,cellPadding:{top:4,right:4,bottom:4,left:4},lineWidth:0.3,lineColor:[180,195,215]},
+    bodyStyles:{fontSize:8.5,textColor:[20,30,50],cellPadding:{top:3.5,right:4,bottom:3.5,left:4},lineWidth:0.3,lineColor:[180,195,215]},
+    alternateRowStyles:{fillColor:[240,244,248]},
+    columnStyles:{0:{cellWidth:12,halign:'center'},1:{cellWidth:28},2:{cellWidth:52},3:{cellWidth:42},4:{cellWidth:24,halign:'center'},5:{cellWidth:24,halign:'center'}}
+  });
+  y=doc.lastAutoTable.finalY+7;
+
+  var activeRows=Array.from(document.querySelectorAll('#tBody tr')).filter(function(tr){var inp=tr.querySelectorAll('input');return(inp[0]&&inp[0].value.trim())||(inp[1]&&inp[1].value.trim());});
+  var vp=photos.map(function(p,i){var wCoords='';if(activeRows[i]){var inp=activeRows[i].querySelectorAll('input');wCoords=inp[2]?inp[2].value.trim():'';}return{img:p,coords:wCoords,fig:i+1};}).filter(function(p){return p.img;});
+  if(vp.length>0){
+    chk(30);y=secBar(y,4,'Archivo Fotogr\u00e1fico');
+    var cols=2,gap=8;
+    var pw=(CW-gap)/cols;
+    var ph=Math.round(pw*0.75);
+    var figH=6,crdH=6,rowH=ph+figH+crdH+14;
+    for(var i=0;i<vp.length;i++){
+      var col=i%cols,px=M+col*(pw+gap);
+      if(col===0)chk(rowH+6);
+      var py=y;
+      try{
+        doc.addImage(vp[i].img,'JPEG',px,py,pw,ph);
+        doc.setDrawColor(26,58,92);doc.setLineWidth(0.4);
+        doc.rect(px,py,pw,ph,'S');
+      }catch(ex){}
+      doc.setTextColor(20,30,50);
+      doc.setFontSize(9);doc.setFont('helvetica','bold');
+      doc.text('Fig '+vp[i].fig+'.',px+pw/2,py+ph+figH,{align:'center'});
+      if(vp[i].coords){
+        doc.setFont('helvetica','normal');doc.setFontSize(8);
+        doc.setTextColor(80,100,130);
+        doc.text('Coordenadas: '+vp[i].coords,px+pw/2,py+ph+figH+crdH,{align:'center'});
+      }
+      if(col===cols-1||i===vp.length-1)y+=rowH;
+    }
+    y+=4;
+  }
+
+  if(gv('s5_obs')){chk(35);y=secBar(y,5,'Observaciones');y=textBlock(y,gv('s5_obs'));}
+  if(gv('s6_rec')){chk(35);y=secBar(y,6,'Recomendaciones');y=textBlock(y,gv('s6_rec'));}
+
+  chk(44);y+=6;
+  var sw=(CW-16)/2;
+  doc.setDrawColor(180,195,215);doc.setLineWidth(0.3);
+  doc.rect(M,y,sw,28,'S');doc.setFillColor(26,58,92);doc.rect(M,y,sw,7,'F');
+  doc.setTextColor(255,255,255);doc.setFontSize(8);doc.setFont('helvetica','bold');
+  doc.text('REALIZADO POR',M+sw/2,y+4.8,{align:'center'});
+  doc.setTextColor(20,30,50);doc.setFont('helvetica','normal');doc.setFontSize(8.5);
+  doc.text((gv('s1_realizado')||'').toUpperCase(),M+sw/2,y+15,{align:'center'});
+  if(gv('s1_cargo')){doc.setFontSize(7.5);doc.setTextColor(100,116,139);doc.text(gv('s1_cargo'),M+sw/2,y+21,{align:'center'});}
+  var rx=M+sw+16;
+  doc.setDrawColor(180,195,215);doc.rect(rx,y,sw,28,'S');
+  doc.setFillColor(26,58,92);doc.rect(rx,y,sw,7,'F');
+  doc.setTextColor(255,255,255);doc.setFont('helvetica','bold');doc.setFontSize(8);
+  doc.text('REVISADO / APROBADO',rx+sw/2,y+4.8,{align:'center'});
+  doc.setTextColor(100,116,139);doc.setFont('helvetica','normal');doc.setFontSize(8.5);
+  doc.text('_____________________',rx+sw/2,y+20,{align:'center'});
+
+  var total=doc.getNumberOfPages();
+  for(var p=1;p<=total;p++){doc.setPage(p);drawFooter(p,total);}
+  var fname='TELCONET_InspeccionPozos_'+(gv('s1_fecha')||'sinFecha')+'.pdf';
+  doc.save(fname);toast('PDF generado: '+fname,'ok');
+}
+
+function fmtDate(s){if(!s)return'—';var p=s.split('-');return p[2]+'/'+p[1]+'/'+p[0];}
+function esc(s){return String(s||'').replace(/"/g,'&quot;').replace(/</g,'&lt;').replace(/>/g,'&gt;');}
+function toast(msg,type){type=type||'inf';var icons={ok:'✔',err:'✖',inf:'ℹ'};var t=document.createElement('div');t.className='toast '+type;t.innerHTML='<span style="font-size:14px">'+icons[type]+'</span> '+msg;document.getElementById('toastC').appendChild(t);setTimeout(function(){t.style.animation='tout .22s ease forwards';setTimeout(function(){t.remove();},220);},3500);}
+document.getElementById('confirmOv').addEventListener('click',function(e){if(e.target===this)closeConfirm();});
+document.getElementById('previewOv').addEventListener('click',function(e){if(e.target===this)closePreview();});
+
+
+
+// ── LANDING ──────────────────────────────────────────────────────────
+function volverMenu(btn) {
+  // Hide all forms
+  var ids = ['pozos-header','pozos-wrap','gis-app','opu-app'];
+  ids.forEach(function(id){ var el=document.getElementById(id); if(el) el.style.display='none'; });
+  // Show landing
+  document.getElementById('landing').style.display = 'flex';
+}
+
+function selectForm(type) {
+  document.getElementById('landing').style.display = 'none';
+  if (type === 'pozos') {
+    document.getElementById('pozos-header').style.display = '';
+    document.getElementById('pozos-wrap').style.display = '';
+  } else if (type === 'gis') {
+    document.getElementById('gis-app').style.display = 'block';
+    initGISPhotos();
+    var fd = document.getElementById('g_fecha');
+    if (fd && !fd.value) fd.value = new Date().toISOString().split('T')[0];
+  } else if (type === 'opu') {
+    document.getElementById('opu-app').style.display = 'block';
+    // Set auto date/time
+    var now = new Date();
+    var pad = function(n){return n<10?'0'+n:n;};
+    var dt = pad(now.getDate())+'/'+pad(now.getMonth()+1)+'/'+now.getFullYear()+' '+
+             pad(now.getHours())+':'+pad(now.getMinutes())+':'+pad(now.getSeconds());
+    document.getElementById('o_fecha').value = dt;
+    // Init after browser renders the visible form
+    setTimeout(function(){ initSignaturePads(); }, 200);
+  }
+}
+
+// ── GIS PHOTOS ───────────────────────────────────────────────────────
+
+function initGISPhotos() {
+  var grid = document.getElementById('gisPhotoGrid');
+  if (!grid || grid.children.length > 0) return;
+  addGISPhoto();
+}
+
+function addGISPhoto() {
+  var idx = gisPhotos.length;
+  gisPhotos.push({img: null, desc: ''});
+  document.getElementById('gisPhotoGrid').appendChild(buildGISSlot(idx));
+}
+
+function buildGISSlot(i) {
+  var d = document.createElement('div');
+  var foto = gisPhotos[i] || {img:null, desc:''};
+  d.className = 'pslot' + (foto.img ? ' has-img' : '');
+  d.id = 'gslot_' + i;
+  d.style.cssText = 'display:flex;flex-direction:column;';
+
+  var rmBtn = '<button class="btn btn-xs" style="background:rgba(255,255,255,.15);color:#fff;border:1px solid rgba(255,255,255,.25);margin-left:auto" onclick="deleteGISSlot('+i+')">&#10005;</button>';
+  var imgArea = foto.img
+    ? '<div class="ppreview"><img src="'+foto.img+'" alt="Foto '+(i+1)+'"><button class="prm" onclick="removeGISPhoto('+i+')">&#10005;</button></div>'
+    : '<div class="pzone" onclick="triggerGISPhoto('+i+')"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><path d="M21 15v4a2 2 0 01-2 2H5a2 2 0 01-2-2v-4"/><polyline points="17 8 12 3 7 8"/><line x1="12" y1="3" x2="12" y2="15"/></svg><p><strong>Foto '+(i+1)+'</strong><br>Toque para subir</p></div>';
+
+  d.innerHTML =
+    '<div class="phead"><span>&#128247; Foto '+(i+1)+'</span>'+rmBtn+'</div>'+
+    imgArea+
+    '<div style="padding:8px 10px;border-top:1px solid var(--border);background:#f8fafc">'+
+      '<input type="text" placeholder="Descripción de la foto..." '+
+        'value="'+((foto.desc||'').replace(/"/g,'&quot;'))+'" '+
+        'oninput="gisPhotos['+i+'].desc=this.value" '+
+        'style="width:100%;padding:5px 8px;border:1.5px solid var(--border);border-radius:6px;font-size:12px;background:#fff">'+
+    '</div>';
+
+  // Drag & drop
+  d.addEventListener('dragover',  function(e){ e.preventDefault(); d.classList.add('dragover'); });
+  d.addEventListener('dragleave', function(e){ d.classList.remove('dragover'); });
+  d.addEventListener('drop', function(e){
+    e.preventDefault(); d.classList.remove('dragover');
+    var file = e.dataTransfer.files[0];
+    if (!file || !file.type.startsWith('image/')) return;
+    processGISPhoto(i, file);
+  });
+  return d;
+}
+
+function processGISPhoto(idx, file) {
+  var r = new FileReader();
+  r.onload = function(ev) {
+    var img = new Image();
+    img.onload = function() {
+      var c = document.createElement('canvas');
+      var w = img.width, h = img.height;
+      if (w > 1000) { h = Math.round(h*1000/w); w = 1000; }
+      c.width = w; c.height = h;
+      c.getContext('2d').drawImage(img, 0, 0, w, h);
+      gisPhotos[idx].img = c.toDataURL('image/jpeg', 0.82);
+      document.getElementById('gisPhotoGrid').replaceChild(
+        buildGISSlot(idx), document.getElementById('gslot_'+idx));
+    };
+    img.src = ev.target.result;
+  };
+  r.readAsDataURL(file);
+}
+
+function triggerGISPhoto(idx) {
+  var inp = document.getElementById('gisPhotoIn');
+  inp.onchange = function(e) {
+    var file = e.target.files[0];
+    if (!file) return;
+    processGISPhoto(idx, file);
+    e.target.value = '';
+  };
+  inp.click();
+}
+
+function removeGISPhoto(idx) {
+  gisPhotos[idx].img = null;
+  document.getElementById('gisPhotoGrid').replaceChild(
+    buildGISSlot(idx), document.getElementById('gslot_'+idx));
+}
+
+function deleteGISSlot(idx) {
+  gisPhotos.splice(idx, 1);
+  var grid = document.getElementById('gisPhotoGrid');
+  grid.innerHTML = '';
+  for (var i = 0; i < gisPhotos.length; i++) grid.appendChild(buildGISSlot(i));
+}
+
+// ── GIS GENERAR ───────────────────────────────────────────────────────
+function ggv(id) { var el = document.getElementById(id); return el ? el.value.trim() : ''; }
+
+function generarGIS() {
+  if (!ggv('g_nombre_punto') || !ggv('g_realizado')) {
+    alert('Completa al menos: Realizado por y Nombre del punto');
+    return;
+  }
+  document.getElementById('pdfOv').classList.add('show');
+  document.querySelector('#pdfOv p').textContent = 'Generando Word GIS...';
+
+  var data = {
+    realizado:      ggv('g_realizado'),
+    fecha:          ggv('g_fecha'),
+    nombre_punto:   ggv('g_nombre_punto'),
+    nombre_cliente: ggv('g_nombre_cliente'),
+    direccion:      ggv('g_direccion'),
+    login:          ggv('g_login'),
+    contacto:       ggv('g_contacto'),
+    empresa:        ggv('g_empresa'),
+    tecnico:        ggv('g_tecnico'),
+    zona:           ggv('g_zona'),
+    descripcion:    ggv('g_descripcion'),
+    nodo_inicio:    ggv('g_nodo_inicio'),
+    nodo_final:     ggv('g_nodo_final'),
+    ruta:           ggv('g_ruta'),
+    caja:           ggv('g_caja'),
+    buffer:         ggv('g_buffer'),
+    hilos:          ggv('g_hilos'),
+    codigo_caja:    ggv('g_codigo_caja'),
+    conclusiones:   ggv('g_conclusiones'),
+    tiempo:         ggv('g_tiempo'),
+    fotos: gisPhotos.map(function(f) { return { img: (f&&f.img)||'', desc: (f&&f.desc)||'' }; }),
+    mat_adicionales: ggv('g_mat_adicionales'),
+    materiales: (function(){
+      var keys = ['fibra','canaleta','manguera_anillada','manguera_plastica','tubo_conduit',
+                  'grapas_plasticas','grapas_metalicas','tacos','alambre','amarras',
+                  'caja_bmx','caja_multimedia','pachtcord_fibra','patchcord_utp',
+                  'duplex','simplex','tubos_fusion','sliders','abrazaderas','broca','minimanga'];
+      return keys.map(function(k){
+        return {
+          key: k,
+          cantidad: ggv('gm_'+k+'_cantidad'),
+          medida:   ggv('gm_'+k+'_medida'),
+          metros:   ggv('gm_'+k+'_metros'),
+          total:    ggv('gm_'+k+'_total')
+        };
+      }).filter(function(m){ return m.cantidad||m.medida||m.metros||m.total; });
+    })()
+  };
+
+  fetch(SERVER+'/generar-gis', {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify(data)
+  })
+  .then(function(r) { return r.json(); })
+  .then(function(res) {
+    document.getElementById('pdfOv').classList.remove('show');
+    if (res.error) { alert('Error: ' + res.error); return; }
+    var byteStr = atob(res.file);
+    var ab = new ArrayBuffer(byteStr.length);
+    var ia = new Uint8Array(ab);
+    for (var i = 0; i < byteStr.length; i++) ia[i] = byteStr.charCodeAt(i);
+    var blob = new Blob([ab], { type: res.mime });
+    var url = URL.createObjectURL(blob);
+    var a = document.createElement('a');
+    a.href = url; a.download = res.filename;
+    document.body.appendChild(a); a.click();
+    document.body.removeChild(a);
+    URL.revokeObjectURL(url);
+    if (res.warning) alert(res.warning);
+    else { var t=document.getElementById('toast'); if(t){t.textContent='✔ '+res.filename;t.className='show ok';setTimeout(function(){t.className=''},3200);} }
+  })
+  .catch(function(e) {
+    document.getElementById('pdfOv').classList.remove('show');
+    alert('No se pudo conectar al servidor. Asegúrate de ejecutar server.py');
+  });
+}
+
+function limpiarGIS() {
+  document.querySelectorAll('#gis-app .fi').forEach(function(el) {
+    if (el.tagName === 'SELECT') el.selectedIndex = 0; else el.value = '';
+  });
+  gisPhotos = [];
+  var grid = document.getElementById('gisPhotoGrid');
+  grid.innerHTML = '';
+  gisPhotos.push({img:null,desc:''});
+  grid.appendChild(buildGISSlot(0));
+  var fd = document.getElementById('g_fecha');
+  if (fd) fd.value = new Date().toISOString().split('T')[0];
+  // Clear materials
+  document.querySelectorAll('#gis-app input[id^="gm_"]').forEach(function(el){ el.value=''; });
+}
+
+// Hide pozos form initially — show via landing
+// pozos hidden via HTML style attribute
+
+
+// ── OPU SI/NO ─────────────────────────────────────────────────────────
+// opuSiNo declared at top of script
+var sinoQuestions = [
+  'La puntualidad de la llegada de la cuadrilla fue satisfactoria',
+  'La calidad de la instalación de la cuadrilla fue satisfactoria',
+  'La presencia, lenguaje, vestimenta, cordialidad de la cuadrilla fue satisfactoria',
+  '¿Están identificados los bienes de propiedad del cliente antes de la instalación?',
+  '¿Se solicitó al cliente la reubicación de algún bien de su propiedad para salvaguardarlo?',
+  '¿Existió pérdida, deterioro o cualquier otra novedad con los bienes de propiedad del cliente?'
+];
+
+// initSiNo removed - buttons now static HTML
+
+
+
+function setSiNo(idx, valInt) {
+  // valInt: 0=SI, 1=NO
+  opuSiNo[idx] = valInt === 0 ? 'SI' : 'NO';
+  var si = document.getElementById('sino_si_'+idx);
+  var no = document.getElementById('sino_no_'+idx);
+  if (si) si.classList.toggle('selected', valInt === 0);
+  if (no) no.classList.toggle('selected', valInt === 1);
+}
+
+// ── SIGNATURE PADS ────────────────────────────────────────────────────
+function initSignaturePads() {
+  setupCanvas('sigTecnico', 'firmaT');
+  setupCanvas('sigCliente', 'firmaC');
+}
+
+function setupCanvas(canvasId, hiddenId) {
+  var canvas = document.getElementById(canvasId);
+  if (!canvas) return;
+
+  // Reset canvas size to force re-render
+  canvas.width = canvas.offsetWidth || 300;
+  canvas.height = 120;
+
+  var ctx = canvas.getContext('2d');
+  ctx.fillStyle = '#ffffff';
+  ctx.fillRect(0, 0, canvas.width, canvas.height);
+  ctx.strokeStyle = '#000000';
+  ctx.lineWidth = 2.5;
+  ctx.lineCap = 'round';
+  ctx.lineJoin = 'round';
+
+  // Only attach listeners once
+  if (canvas._sigInit) return;
+  canvas._sigInit = true;
+
+  var drawing = false;
+
+  function getPos(e) {
+    var r = canvas.getBoundingClientRect();
+    var scaleX = canvas.width / r.width;
+    var scaleY = canvas.height / r.height;
+    var src = e.touches ? e.touches[0] : e;
+    return { x: (src.clientX - r.left) * scaleX, y: (src.clientY - r.top) * scaleY };
+  }
+  function start(e) {
+    e.preventDefault();
+    drawing = true;
+    var p = getPos(e);
+    ctx.beginPath();
+    ctx.moveTo(p.x, p.y);
+  }
+  function move(e) {
+    e.preventDefault();
+    if (!drawing) return;
+    var p = getPos(e);
+    ctx.lineTo(p.x, p.y);
+    ctx.stroke();
+    ctx.beginPath();
+    ctx.moveTo(p.x, p.y);
+  }
+  function stop(e) {
+    if (!drawing) return;
+    drawing = false;
+    var h = document.getElementById(hiddenId);
+    if (h) h.value = canvas.toDataURL('image/png');
+  }
+
+  canvas.addEventListener('mousedown',  start);
+  canvas.addEventListener('mousemove',  move);
+  canvas.addEventListener('mouseup',    stop);
+  canvas.addEventListener('mouseleave', stop);
+  canvas.addEventListener('touchstart', start, {passive:false});
+  canvas.addEventListener('touchmove',  move,  {passive:false});
+  canvas.addEventListener('touchend',   stop);
+}
+
+function saveSignature(canvasId) {
+  var canvas = document.getElementById(canvasId);
+  if (!canvas) return;
+  var hiddenId = canvasId === 'sigTecnico' ? 'firmaT' : 'firmaC';
+  var h = document.getElementById(hiddenId);
+  if (h) h.value = canvas.toDataURL('image/png');
+}
+
+function clearSig(canvasId, hiddenId) {
+  var canvas = document.getElementById(canvasId);
+  if (!canvas) return;
+  canvas.width = canvas.offsetWidth || 300;
+  canvas.height = 120;
+  var ctx = canvas.getContext('2d');
+  ctx.fillStyle = '#ffffff';
+  ctx.fillRect(0, 0, canvas.width, canvas.height);
+  ctx.strokeStyle = '#000000';
+  ctx.lineWidth = 2.5;
+  ctx.lineCap = 'round';
+  ctx.lineJoin = 'round';
+  var h = document.getElementById(hiddenId);
+  if (h) h.value = '';
+}
+
+// ── OPU GENERAR ───────────────────────────────────────────────────────
+function ogv(id) { var el=document.getElementById(id); return el?el.value.trim():''; }
+
+function generarOPU() {
+  if (!ogv('o_tecnico') || !ogv('o_cliente')) {
+    alert('Completa al menos: Nombre Técnico y Cliente');
+    return;
+  }
+  document.getElementById('pdfOv').classList.add('show');
+  document.querySelector('#pdfOv p').textContent = 'Generando Word OPU...';
+
+  var data = {
+    fecha:           ogv('o_fecha'),
+    tecnico:         ogv('o_tecnico'),
+    instalacion:     ogv('o_instalacion'),
+    cliente:         ogv('o_cliente'),
+    login:           ogv('o_login'),
+    fibra:           ogv('o_fibra'),
+    cable_acometida: ogv('o_cable_acometida'),
+    codigo_caja:     ogv('o_codigo_caja'),
+    hilo:            ogv('o_hilo'),
+    sw:              ogv('o_sw'),
+    puerto:          ogv('o_puerto'),
+    responsable:     ogv('o_responsable'),
+    fibra_m:         ogv('om_fibra_m'),
+    cable_utp:       ogv('om_cable_utp'),
+    conector_rj45:   ogv('om_conector_rj45'),
+    pathcord_fo:     ogv('om_pathcord_fo'),
+    simplex:         ogv('om_simplex'),
+    botitas:         ogv('om_botitas'),
+    tubillos:        ogv('om_tubillos'),
+    duplex:          ogv('om_duplex'),
+    caja_multimedia: ogv('om_caja_multimedia'),
+    serie_tx_nodo:   ogv('om_serie_tx_nodo'),
+    serie_tx_cliente:ogv('om_serie_tx_cliente'),
+    router_modelo:   ogv('om_router_modelo'),
+    router_serie:    ogv('om_router_serie'),
+    ganchos:         ogv('om_ganchos'),
+    amarras:         ogv('om_amarras'),
+    pinzas:          ogv('om_pinzas'),
+    sinos:           opuSiNo.slice(),
+    firma_tecnico:   ogv('firmaT'),
+    firma_cliente:   ogv('firmaC')
+  };
+
+  try {
+    var bodyStr = JSON.stringify(data);
+  } catch(jsonErr) {
+    document.getElementById('pdfOv').classList.remove('show');
+    alert('Error preparando datos: ' + jsonErr.message);
+    return;
+  }
+
+  fetch(SERVER+'/generar-opu', {
+    method:'POST',
+    headers:{'Content-Type':'application/json'},
+    body: bodyStr
+  })
+  .then(function(r){
+    if(!r.ok) return r.text().then(function(t){ throw new Error('HTTP '+r.status+': '+t.substring(0,200)); });
+    return r.json();
+  })
+  .then(function(res){
+    document.getElementById('pdfOv').classList.remove('show');
+    if(res.error){ alert('Error del servidor:\n' + res.error + (res.trace ? '\n\n' + res.trace.substring(0,300) : '')); return; }
+    var byteStr=atob(res.file), ab=new ArrayBuffer(byteStr.length), ia=new Uint8Array(ab);
+    for(var i=0;i<byteStr.length;i++) ia[i]=byteStr.charCodeAt(i);
+    var blob=new Blob([ab],{type:res.mime}), url=URL.createObjectURL(blob);
+    var a=document.createElement('a'); a.href=url; a.download=res.filename;
+    document.body.appendChild(a); a.click(); document.body.removeChild(a);
+    URL.revokeObjectURL(url);
+    var t=document.getElementById('toast');
+    if(t){t.textContent='✔ '+res.filename;t.className='show ok';setTimeout(function(){t.className=''},3200);}
+  })
+  .catch(function(err){
+    document.getElementById('pdfOv').classList.remove('show');
+    alert('Error: ' + err.message);
+  });
+}
+
+function limpiarOPU() {
+  document.querySelectorAll('#opu-app .fi').forEach(function(el){el.value='';});
+  opuSiNo = ['','','','','',''];
+  for(var i=0;i<6;i++){
+    var si=document.getElementById('sino_si_'+i);
+    var no=document.getElementById('sino_no_'+i);
+    if(si) si.classList.remove('selected');
+    if(no) no.classList.remove('selected');
+  }
+  clearSig('sigTecnico','firmaT');
+  clearSig('sigCliente','firmaC');
+  // Reset fecha
+  var now=new Date(), pad=function(n){return n<10?'0'+n:n;};
+  document.getElementById('o_fecha').value = pad(now.getDate())+'/'+pad(now.getMonth()+1)+'/'+now.getFullYear()+' '+pad(now.getHours())+':'+pad(now.getMinutes())+':'+pad(now.getSeconds());
+}
+
+
+</script>
+
+<div class="ov" id="previewOv">
+  <div class="dlg-preview">
+    <div class="prev-head">
+      <h3>&#128196; Previsualizaci&#243;n del Informe</h3>
+      <button class="prev-close" onclick="closePreview()" title="Cerrar">&#10005;</button>
+    </div>
+    <div class="prev-body" id="prevBody"></div>
+    <div class="prev-foot">
+      <button class="btn btn-ghost" onclick="closePreview()">&#9998; Editar</button>
+      <button class="btn btn-red" onclick="closePreview();generatePDFDirect()">
+        <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M14 2H6a2 2 0 00-2 2v16a2 2 0 002 2h12a2 2 0 002-2V8z"/><polyline points="14 2 14 8 20 8"/></svg>
+        Generar PDF
+      </button>
+    </div>
+  </div>
+</div>
+
+<!-- ═══ GIS FORM ════════════════════════════════════════════════════ -->
+<div id="gis-app" style="display:none">
+  <header class="app-header">
+    <div class="hinner">
+      <div class="logo-area">
+        <img class="logo-img" src="data:image/png;base64,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" alt="TELCONET">
+        <div class="logo-text"><h1>TELCONET S.A.</h1><span>Informe GIS — FOR-GIS-08</span></div>
+      </div>
+      <div class="hbtns">
+        <button class="btn btn-outline btn-sm" onclick="volverMenu(this)" style="display:inline-flex;align-items:center;gap:6px">
+          <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M3 9l9-7 9 7v11a2 2 0 01-2 2H5a2 2 0 01-2-2z"/><polyline points="9 22 9 12 15 12 15 22"/></svg>
+          Menú
+        </button>
+        <button class="btn btn-red" onclick="generarGIS()">
+          <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M14 2H6a2 2 0 00-2 2v16a2 2 0 002 2h12a2 2 0 002-2V8z"/><polyline points="14 2 14 8 20 8"/></svg>
+          Generar Word
+        </button>
+      </div>
+    </div>
+  </header>
+
+  <div class="wrap">
+    <!-- S1: Datos generales -->
+    <div class="card">
+      <div class="card-head"><span class="sec-n">1</span><h2>Datos Generales</h2></div>
+      <div class="card-body">
+        <div class="g2">
+          <div class="fg"><label>Realizado por <span class="req">*</span></label><input id="g_realizado" class="fi" placeholder="Nombre del técnico"></div>
+          <div class="fg"><label>Fecha <span class="req">*</span></label><input id="g_fecha" type="date" class="fi"></div>
+        </div>
+        <div class="g2">
+          <div class="fg"><label>Nombre del punto <span class="req">*</span></label><input id="g_nombre_punto" class="fi" placeholder="Nombre del punto de instalación"></div>
+          <div class="fg"><label>Nombre del cliente</label><input id="g_nombre_cliente" class="fi" placeholder="Nombre del cliente"></div>
+        </div>
+        <div class="g1"><div class="fg"><label>Dirección del punto</label><input id="g_direccion" class="fi" placeholder="Dirección completa"></div></div>
+        <div class="g2">
+          <div class="fg"><label>LOGIN</label><input id="g_login" class="fi" placeholder="Usuario de login"></div>
+          <div class="fg"><label>Números de contacto</label><input id="g_contacto" class="fi" placeholder="Teléfonos de contacto"></div>
+        </div>
+        <div class="g2">
+          <div class="fg"><label>Empresa</label><input id="g_empresa" class="fi" placeholder="Empresa"></div>
+          <div class="fg"><label>Técnico Responsable</label><input id="g_tecnico" class="fi" placeholder="Técnico responsable"></div>
+        </div>
+        <div class="g2">
+          <div class="fg"><label>Zona Asignada</label><input id="g_zona" class="fi" placeholder="Zona"></div>
+          <div class="fg"><label>Descripción del trabajo</label><input id="g_descripcion" class="fi" placeholder="Descripción"></div>
+        </div>
+      </div>
+    </div>
+
+    <!-- S2: Nodo/Ruta -->
+    <div class="card">
+      <div class="card-head"><span class="sec-n">2</span><h2>Datos de Red</h2></div>
+      <div class="card-body">
+        <div class="g2">
+          <div class="fg"><label>Nodo Inicio</label><input id="g_nodo_inicio" class="fi" placeholder="Nodo inicio"></div>
+          <div class="fg"><label>Nodo Final</label><input id="g_nodo_final" class="fi" placeholder="Nodo final"></div>
+        </div>
+        <div class="g2">
+          <div class="fg"><label>Ruta</label><input id="g_ruta" class="fi" placeholder="Ruta"></div>
+          <div class="fg"><label>Caja</label><input id="g_caja" class="fi" placeholder="Caja"></div>
+        </div>
+        <div class="g2">
+          <div class="fg"><label>Buffer</label><input id="g_buffer" class="fi" placeholder="Buffer"></div>
+          <div class="fg"><label>Hilos Libres</label><input id="g_hilos" class="fi" placeholder="Hilos libres"></div>
+        </div>
+        <div class="g1"><div class="fg"><label>Código de Caja BMX</label><input id="g_codigo_caja" class="fi" placeholder="Código BMX"></div></div>
+      </div>
+    </div>
+
+    <!-- S3: Fotos -->
+    <div class="card">
+      <div class="card-head"><span class="sec-n">3</span><h2>Descripción Fotográfica</h2></div>
+      <div class="card-body">
+        <div class="pgrid" id="gisPhotoGrid"></div>
+        <button class="btn btn-ghost btn-sm" onclick="addGISPhoto()" style="margin-top:10px">
+          <svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg>
+          Agregar foto
+        </button>
+      </div>
+    </div>
+
+
+    <!-- S4: Materiales -->
+    <div class="card">
+      <div class="card-head"><span class="sec-n">4</span><h2>Lista de Materiales</h2></div>
+      <div class="card-body">
+        <div class="twrap">
+          <table style="width:100%;border-collapse:collapse;font-size:12px;min-width:500px">
+            <thead>
+              <tr style="background:var(--blue);color:#fff">
+                <th style="padding:8px;text-align:left;font-size:11px">Material</th>
+                <th style="padding:8px;text-align:center;font-size:11px">Cantidad</th>
+                <th style="padding:8px;text-align:center;font-size:11px">Medida / # hilos</th>
+                <th style="padding:8px;text-align:center;font-size:11px">Metros</th>
+                <th style="padding:8px;text-align:center;font-size:11px">Total</th>
+              </tr>
+            </thead>
+            <tbody>
+        <tr>
+          <td style="padding:5px 8px;font-size:12px;color:var(--blue);font-weight:600;border:1px solid var(--border)">Fibra óptica</td>
+          <td style="border:1px solid var(--border);padding:2px"><input class="fi" id="gm_fibra_cantidad" placeholder="0" style="border:none;padding:4px 6px;font-size:12px"></td>
+          <td style="border:1px solid var(--border);padding:2px"><input class="fi" id="gm_fibra_medida" placeholder="-" style="border:none;padding:4px 6px;font-size:12px"></td>
+          <td style="border:1px solid var(--border);padding:2px"><input class="fi" id="gm_fibra_metros" placeholder="0" style="border:none;padding:4px 6px;font-size:12px"></td>
+          <td style="border:1px solid var(--border);padding:2px"><input class="fi" id="gm_fibra_total" placeholder="0" style="border:none;padding:4px 6px;font-size:12px"></td>
+        </tr>
+        <tr>
+          <td style="padding:5px 8px;font-size:12px;color:var(--blue);font-weight:600;border:1px solid var(--border)">Canaleta 7x13</td>
+          <td style="border:1px solid var(--border);padding:2px"><input class="fi" id="gm_canaleta_cantidad" placeholder="0" style="border:none;padding:4px 6px;font-size:12px"></td>
+          <td style="border:1px solid var(--border);padding:2px"><input class="fi" id="gm_canaleta_medida" placeholder="-" style="border:none;padding:4px 6px;font-size:12px"></td>
+          <td style="border:1px solid var(--border);padding:2px"><input class="fi" id="gm_canaleta_metros" placeholder="0" style="border:none;padding:4px 6px;font-size:12px"></td>
+          <td style="border:1px solid var(--border);padding:2px"><input class="fi" id="gm_canaleta_total" placeholder="0" style="border:none;padding:4px 6px;font-size:12px"></td>
+        </tr>
+        <tr>
+          <td style="padding:5px 8px;font-size:12px;color:var(--blue);font-weight:600;border:1px solid var(--border)">Manguera Anillada</td>
+          <td style="border:1px solid var(--border);padding:2px"><input class="fi" id="gm_manguera_anillada_cantidad" placeholder="0" style="border:none;padding:4px 6px;font-size:12px"></td>
+          <td style="border:1px solid var(--border);padding:2px"><input class="fi" id="gm_manguera_anillada_medida" placeholder="-" style="border:none;padding:4px 6px;font-size:12px"></td>
+          <td style="border:1px solid var(--border);padding:2px"><input class="fi" id="gm_manguera_anillada_metros" placeholder="0" style="border:none;padding:4px 6px;font-size:12px"></td>
+          <td style="border:1px solid var(--border);padding:2px"><input class="fi" id="gm_manguera_anillada_total" placeholder="0" style="border:none;padding:4px 6px;font-size:12px"></td>
+        </tr>
+        <tr>
+          <td style="padding:5px 8px;font-size:12px;color:var(--blue);font-weight:600;border:1px solid var(--border)">Manguera Plástica</td>
+          <td style="border:1px solid var(--border);padding:2px"><input class="fi" id="gm_manguera_plastica_cantidad" placeholder="0" style="border:none;padding:4px 6px;font-size:12px"></td>
+          <td style="border:1px solid var(--border);padding:2px"><input class="fi" id="gm_manguera_plastica_medida" placeholder="-" style="border:none;padding:4px 6px;font-size:12px"></td>
+          <td style="border:1px solid var(--border);padding:2px"><input class="fi" id="gm_manguera_plastica_metros" placeholder="0" style="border:none;padding:4px 6px;font-size:12px"></td>
+          <td style="border:1px solid var(--border);padding:2px"><input class="fi" id="gm_manguera_plastica_total" placeholder="0" style="border:none;padding:4px 6px;font-size:12px"></td>
+        </tr>
+        <tr>
+          <td style="padding:5px 8px;font-size:12px;color:var(--blue);font-weight:600;border:1px solid var(--border)">Tubo Conduit</td>
+          <td style="border:1px solid var(--border);padding:2px"><input class="fi" id="gm_tubo_conduit_cantidad" placeholder="0" style="border:none;padding:4px 6px;font-size:12px"></td>
+          <td style="border:1px solid var(--border);padding:2px"><input class="fi" id="gm_tubo_conduit_medida" placeholder="-" style="border:none;padding:4px 6px;font-size:12px"></td>
+          <td style="border:1px solid var(--border);padding:2px"><input class="fi" id="gm_tubo_conduit_metros" placeholder="0" style="border:none;padding:4px 6px;font-size:12px"></td>
+          <td style="border:1px solid var(--border);padding:2px"><input class="fi" id="gm_tubo_conduit_total" placeholder="0" style="border:none;padding:4px 6px;font-size:12px"></td>
+        </tr>
+        <tr>
+          <td style="padding:5px 8px;font-size:12px;color:var(--blue);font-weight:600;border:1px solid var(--border)">Grapas plásticas</td>
+          <td style="border:1px solid var(--border);padding:2px"><input class="fi" id="gm_grapas_plasticas_cantidad" placeholder="0" style="border:none;padding:4px 6px;font-size:12px"></td>
+          <td style="border:1px solid var(--border);padding:2px"><input class="fi" id="gm_grapas_plasticas_medida" placeholder="-" style="border:none;padding:4px 6px;font-size:12px"></td>
+          <td style="border:1px solid var(--border);padding:2px"><input class="fi" id="gm_grapas_plasticas_metros" placeholder="0" style="border:none;padding:4px 6px;font-size:12px"></td>
+          <td style="border:1px solid var(--border);padding:2px"><input class="fi" id="gm_grapas_plasticas_total" placeholder="0" style="border:none;padding:4px 6px;font-size:12px"></td>
+        </tr>
+        <tr>
+          <td style="padding:5px 8px;font-size:12px;color:var(--blue);font-weight:600;border:1px solid var(--border)">Grapas metálicas</td>
+          <td style="border:1px solid var(--border);padding:2px"><input class="fi" id="gm_grapas_metalicas_cantidad" placeholder="0" style="border:none;padding:4px 6px;font-size:12px"></td>
+          <td style="border:1px solid var(--border);padding:2px"><input class="fi" id="gm_grapas_metalicas_medida" placeholder="-" style="border:none;padding:4px 6px;font-size:12px"></td>
+          <td style="border:1px solid var(--border);padding:2px"><input class="fi" id="gm_grapas_metalicas_metros" placeholder="0" style="border:none;padding:4px 6px;font-size:12px"></td>
+          <td style="border:1px solid var(--border);padding:2px"><input class="fi" id="gm_grapas_metalicas_total" placeholder="0" style="border:none;padding:4px 6px;font-size:12px"></td>
+        </tr>
+        <tr>
+          <td style="padding:5px 8px;font-size:12px;color:var(--blue);font-weight:600;border:1px solid var(--border)">Tacos, tornillos</td>
+          <td style="border:1px solid var(--border);padding:2px"><input class="fi" id="gm_tacos_cantidad" placeholder="0" style="border:none;padding:4px 6px;font-size:12px"></td>
+          <td style="border:1px solid var(--border);padding:2px"><input class="fi" id="gm_tacos_medida" placeholder="-" style="border:none;padding:4px 6px;font-size:12px"></td>
+          <td style="border:1px solid var(--border);padding:2px"><input class="fi" id="gm_tacos_metros" placeholder="0" style="border:none;padding:4px 6px;font-size:12px"></td>
+          <td style="border:1px solid var(--border);padding:2px"><input class="fi" id="gm_tacos_total" placeholder="0" style="border:none;padding:4px 6px;font-size:12px"></td>
+        </tr>
+        <tr>
+          <td style="padding:5px 8px;font-size:12px;color:var(--blue);font-weight:600;border:1px solid var(--border)">Alambre galvanizado</td>
+          <td style="border:1px solid var(--border);padding:2px"><input class="fi" id="gm_alambre_cantidad" placeholder="0" style="border:none;padding:4px 6px;font-size:12px"></td>
+          <td style="border:1px solid var(--border);padding:2px"><input class="fi" id="gm_alambre_medida" placeholder="-" style="border:none;padding:4px 6px;font-size:12px"></td>
+          <td style="border:1px solid var(--border);padding:2px"><input class="fi" id="gm_alambre_metros" placeholder="0" style="border:none;padding:4px 6px;font-size:12px"></td>
+          <td style="border:1px solid var(--border);padding:2px"><input class="fi" id="gm_alambre_total" placeholder="0" style="border:none;padding:4px 6px;font-size:12px"></td>
+        </tr>
+        <tr>
+          <td style="padding:5px 8px;font-size:12px;color:var(--blue);font-weight:600;border:1px solid var(--border)">Amarras</td>
+          <td style="border:1px solid var(--border);padding:2px"><input class="fi" id="gm_amarras_cantidad" placeholder="0" style="border:none;padding:4px 6px;font-size:12px"></td>
+          <td style="border:1px solid var(--border);padding:2px"><input class="fi" id="gm_amarras_medida" placeholder="-" style="border:none;padding:4px 6px;font-size:12px"></td>
+          <td style="border:1px solid var(--border);padding:2px"><input class="fi" id="gm_amarras_metros" placeholder="0" style="border:none;padding:4px 6px;font-size:12px"></td>
+          <td style="border:1px solid var(--border);padding:2px"><input class="fi" id="gm_amarras_total" placeholder="0" style="border:none;padding:4px 6px;font-size:12px"></td>
+        </tr>
+        <tr>
+          <td style="padding:5px 8px;font-size:12px;color:var(--blue);font-weight:600;border:1px solid var(--border)">Caja BMX</td>
+          <td style="border:1px solid var(--border);padding:2px"><input class="fi" id="gm_caja_bmx_cantidad" placeholder="0" style="border:none;padding:4px 6px;font-size:12px"></td>
+          <td style="border:1px solid var(--border);padding:2px"><input class="fi" id="gm_caja_bmx_medida" placeholder="-" style="border:none;padding:4px 6px;font-size:12px"></td>
+          <td style="border:1px solid var(--border);padding:2px"><input class="fi" id="gm_caja_bmx_metros" placeholder="0" style="border:none;padding:4px 6px;font-size:12px"></td>
+          <td style="border:1px solid var(--border);padding:2px"><input class="fi" id="gm_caja_bmx_total" placeholder="0" style="border:none;padding:4px 6px;font-size:12px"></td>
+        </tr>
+        <tr>
+          <td style="padding:5px 8px;font-size:12px;color:var(--blue);font-weight:600;border:1px solid var(--border)">Caja multimedia</td>
+          <td style="border:1px solid var(--border);padding:2px"><input class="fi" id="gm_caja_multimedia_cantidad" placeholder="0" style="border:none;padding:4px 6px;font-size:12px"></td>
+          <td style="border:1px solid var(--border);padding:2px"><input class="fi" id="gm_caja_multimedia_medida" placeholder="-" style="border:none;padding:4px 6px;font-size:12px"></td>
+          <td style="border:1px solid var(--border);padding:2px"><input class="fi" id="gm_caja_multimedia_metros" placeholder="0" style="border:none;padding:4px 6px;font-size:12px"></td>
+          <td style="border:1px solid var(--border);padding:2px"><input class="fi" id="gm_caja_multimedia_total" placeholder="0" style="border:none;padding:4px 6px;font-size:12px"></td>
+        </tr>
+        <tr>
+          <td style="padding:5px 8px;font-size:12px;color:var(--blue);font-weight:600;border:1px solid var(--border)">Pachtcord de fibra</td>
+          <td style="border:1px solid var(--border);padding:2px"><input class="fi" id="gm_pachtcord_fibra_cantidad" placeholder="0" style="border:none;padding:4px 6px;font-size:12px"></td>
+          <td style="border:1px solid var(--border);padding:2px"><input class="fi" id="gm_pachtcord_fibra_medida" placeholder="-" style="border:none;padding:4px 6px;font-size:12px"></td>
+          <td style="border:1px solid var(--border);padding:2px"><input class="fi" id="gm_pachtcord_fibra_metros" placeholder="0" style="border:none;padding:4px 6px;font-size:12px"></td>
+          <td style="border:1px solid var(--border);padding:2px"><input class="fi" id="gm_pachtcord_fibra_total" placeholder="0" style="border:none;padding:4px 6px;font-size:12px"></td>
+        </tr>
+        <tr>
+          <td style="padding:5px 8px;font-size:12px;color:var(--blue);font-weight:600;border:1px solid var(--border)">PachtcordUtp</td>
+          <td style="border:1px solid var(--border);padding:2px"><input class="fi" id="gm_patchcord_utp_cantidad" placeholder="0" style="border:none;padding:4px 6px;font-size:12px"></td>
+          <td style="border:1px solid var(--border);padding:2px"><input class="fi" id="gm_patchcord_utp_medida" placeholder="-" style="border:none;padding:4px 6px;font-size:12px"></td>
+          <td style="border:1px solid var(--border);padding:2px"><input class="fi" id="gm_patchcord_utp_metros" placeholder="0" style="border:none;padding:4px 6px;font-size:12px"></td>
+          <td style="border:1px solid var(--border);padding:2px"><input class="fi" id="gm_patchcord_utp_total" placeholder="0" style="border:none;padding:4px 6px;font-size:12px"></td>
+        </tr>
+        <tr>
+          <td style="padding:5px 8px;font-size:12px;color:var(--blue);font-weight:600;border:1px solid var(--border)">Duplex</td>
+          <td style="border:1px solid var(--border);padding:2px"><input class="fi" id="gm_duplex_cantidad" placeholder="0" style="border:none;padding:4px 6px;font-size:12px"></td>
+          <td style="border:1px solid var(--border);padding:2px"><input class="fi" id="gm_duplex_medida" placeholder="-" style="border:none;padding:4px 6px;font-size:12px"></td>
+          <td style="border:1px solid var(--border);padding:2px"><input class="fi" id="gm_duplex_metros" placeholder="0" style="border:none;padding:4px 6px;font-size:12px"></td>
+          <td style="border:1px solid var(--border);padding:2px"><input class="fi" id="gm_duplex_total" placeholder="0" style="border:none;padding:4px 6px;font-size:12px"></td>
+        </tr>
+        <tr>
+          <td style="padding:5px 8px;font-size:12px;color:var(--blue);font-weight:600;border:1px solid var(--border)">Simplex</td>
+          <td style="border:1px solid var(--border);padding:2px"><input class="fi" id="gm_simplex_cantidad" placeholder="0" style="border:none;padding:4px 6px;font-size:12px"></td>
+          <td style="border:1px solid var(--border);padding:2px"><input class="fi" id="gm_simplex_medida" placeholder="-" style="border:none;padding:4px 6px;font-size:12px"></td>
+          <td style="border:1px solid var(--border);padding:2px"><input class="fi" id="gm_simplex_metros" placeholder="0" style="border:none;padding:4px 6px;font-size:12px"></td>
+          <td style="border:1px solid var(--border);padding:2px"><input class="fi" id="gm_simplex_total" placeholder="0" style="border:none;padding:4px 6px;font-size:12px"></td>
+        </tr>
+        <tr>
+          <td style="padding:5px 8px;font-size:12px;color:var(--blue);font-weight:600;border:1px solid var(--border)">Tubos de fusión</td>
+          <td style="border:1px solid var(--border);padding:2px"><input class="fi" id="gm_tubos_fusion_cantidad" placeholder="0" style="border:none;padding:4px 6px;font-size:12px"></td>
+          <td style="border:1px solid var(--border);padding:2px"><input class="fi" id="gm_tubos_fusion_medida" placeholder="-" style="border:none;padding:4px 6px;font-size:12px"></td>
+          <td style="border:1px solid var(--border);padding:2px"><input class="fi" id="gm_tubos_fusion_metros" placeholder="0" style="border:none;padding:4px 6px;font-size:12px"></td>
+          <td style="border:1px solid var(--border);padding:2px"><input class="fi" id="gm_tubos_fusion_total" placeholder="0" style="border:none;padding:4px 6px;font-size:12px"></td>
+        </tr>
+        <tr>
+          <td style="padding:5px 8px;font-size:12px;color:var(--blue);font-weight:600;border:1px solid var(--border)">Sliders</td>
+          <td style="border:1px solid var(--border);padding:2px"><input class="fi" id="gm_sliders_cantidad" placeholder="0" style="border:none;padding:4px 6px;font-size:12px"></td>
+          <td style="border:1px solid var(--border);padding:2px"><input class="fi" id="gm_sliders_medida" placeholder="-" style="border:none;padding:4px 6px;font-size:12px"></td>
+          <td style="border:1px solid var(--border);padding:2px"><input class="fi" id="gm_sliders_metros" placeholder="0" style="border:none;padding:4px 6px;font-size:12px"></td>
+          <td style="border:1px solid var(--border);padding:2px"><input class="fi" id="gm_sliders_total" placeholder="0" style="border:none;padding:4px 6px;font-size:12px"></td>
+        </tr>
+        <tr>
+          <td style="padding:5px 8px;font-size:12px;color:var(--blue);font-weight:600;border:1px solid var(--border)">Abrazaderas</td>
+          <td style="border:1px solid var(--border);padding:2px"><input class="fi" id="gm_abrazaderas_cantidad" placeholder="0" style="border:none;padding:4px 6px;font-size:12px"></td>
+          <td style="border:1px solid var(--border);padding:2px"><input class="fi" id="gm_abrazaderas_medida" placeholder="-" style="border:none;padding:4px 6px;font-size:12px"></td>
+          <td style="border:1px solid var(--border);padding:2px"><input class="fi" id="gm_abrazaderas_metros" placeholder="0" style="border:none;padding:4px 6px;font-size:12px"></td>
+          <td style="border:1px solid var(--border);padding:2px"><input class="fi" id="gm_abrazaderas_total" placeholder="0" style="border:none;padding:4px 6px;font-size:12px"></td>
+        </tr>
+        <tr>
+          <td style="padding:5px 8px;font-size:12px;color:var(--blue);font-weight:600;border:1px solid var(--border)">Broca pasamuros</td>
+          <td style="border:1px solid var(--border);padding:2px"><input class="fi" id="gm_broca_cantidad" placeholder="0" style="border:none;padding:4px 6px;font-size:12px"></td>
+          <td style="border:1px solid var(--border);padding:2px"><input class="fi" id="gm_broca_medida" placeholder="-" style="border:none;padding:4px 6px;font-size:12px"></td>
+          <td style="border:1px solid var(--border);padding:2px"><input class="fi" id="gm_broca_metros" placeholder="0" style="border:none;padding:4px 6px;font-size:12px"></td>
+          <td style="border:1px solid var(--border);padding:2px"><input class="fi" id="gm_broca_total" placeholder="0" style="border:none;padding:4px 6px;font-size:12px"></td>
+        </tr>
+        <tr>
+          <td style="padding:5px 8px;font-size:12px;color:var(--blue);font-weight:600;border:1px solid var(--border)">Minimanga</td>
+          <td style="border:1px solid var(--border);padding:2px"><input class="fi" id="gm_minimanga_cantidad" placeholder="0" style="border:none;padding:4px 6px;font-size:12px"></td>
+          <td style="border:1px solid var(--border);padding:2px"><input class="fi" id="gm_minimanga_medida" placeholder="-" style="border:none;padding:4px 6px;font-size:12px"></td>
+          <td style="border:1px solid var(--border);padding:2px"><input class="fi" id="gm_minimanga_metros" placeholder="0" style="border:none;padding:4px 6px;font-size:12px"></td>
+          <td style="border:1px solid var(--border);padding:2px"><input class="fi" id="gm_minimanga_total" placeholder="0" style="border:none;padding:4px 6px;font-size:12px"></td>
+        </tr>
+            </tbody>
+          </table>
+        </div>
+        <div class="g1" style="margin-top:14px">
+          <div class="fg"><label>Materiales Adicionales</label>
+          <textarea id="g_mat_adicionales" class="fi" rows="3" placeholder="Describa materiales adicionales..."></textarea></div>
+        </div>
+      </div>
+    </div>
+
+    <!-- S5: Conclusiones -->
+    <div class="card">
+      <div class="card-head"><span class="sec-n">5</span><h2>Conclusiones y Recomendaciones</h2></div>
+      <div class="card-body">
+        <div class="g2">
+          <div class="fg"><label>Conclusiones</label><textarea id="g_conclusiones" class="fi" rows="4" placeholder="Conclusiones y recomendaciones..."></textarea></div>
+          <div class="fg"><label>Tiempo estimado</label><input id="g_tiempo" class="fi" placeholder="Ej: 2 horas"></div>
+        </div>
+      </div>
+    </div>
+
+    <div style="display:flex;gap:10px;justify-content:flex-end;flex-wrap:wrap;margin-top:4px">
+      <button class="btn btn-ghost" onclick="limpiarGIS()">Limpiar formulario</button>
+      <button class="btn btn-red" onclick="generarGIS()">
+        <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M14 2H6a2 2 0 00-2 2v16a2 2 0 002 2h12a2 2 0 002-2V8z"/><polyline points="14 2 14 8 20 8"/></svg>
+        Generar Word
+      </button>
+    </div>
+  </div>
+</div>
+
+<input type="file" id="gisPhotoIn" accept="image/*" style="display:none">
+
+
+
+<!-- ═══ OPU FORM ════════════════════════════════════════════════════ -->
+<div id="opu-app" style="display:none">
+  <header class="app-header">
+    <div class="hinner">
+      <div class="logo-area">
+        <img class="logo-img" src="data:image/png;base64,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" alt="TELCONET">
+        <div class="logo-text"><h1>TELCONET S.A.</h1><span>Informe OPU — FOR-OPU-06</span></div>
+      </div>
+      <div class="hbtns">
+        <button class="btn btn-outline btn-sm" onclick="volverMenu(this)" style="display:inline-flex;align-items:center;gap:6px">
+          <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M3 9l9-7 9 7v11a2 2 0 01-2 2H5a2 2 0 01-2-2z"/><polyline points="9 22 9 12 15 12 15 22"/></svg>
+          Menú
+        </button>
+        <button class="btn btn-red" onclick="generarOPU()">
+          <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M14 2H6a2 2 0 00-2 2v16a2 2 0 002 2h12a2 2 0 002-2V8z"/><polyline points="14 2 14 8 20 8"/></svg>
+          Generar Word
+        </button>
+      </div>
+    </div>
+  </header>
+
+  <div class="wrap">
+    <!-- S1: Datos -->
+    <div class="card">
+      <div class="card-head"><span class="sec-n">1</span><h2>Datos Generales</h2></div>
+      <div class="card-body">
+        <div class="g2">
+          <div class="fg"><label>Fecha <span class="req">*</span></label><input id="o_fecha" class="fi" readonly style="background:var(--gray-100);color:var(--muted)"></div>
+          <div class="fg"><label>Nombre Técnico <span class="req">*</span></label><input id="o_tecnico" class="fi" placeholder="Nombre del técnico"></div>
+        </div>
+        <div class="g2">
+          <div class="fg"><label>Instalación</label><input id="o_instalacion" class="fi" placeholder="Nombre instalación"></div>
+          <div class="fg"><label>Cliente <span class="req">*</span></label><input id="o_cliente" class="fi" placeholder="Nombre del cliente"></div>
+        </div>
+        <div class="g2">
+          <div class="fg"><label>Login</label><input id="o_login" class="fi" placeholder="Login"></div>
+          <div class="fg"><label>Fibra</label><input id="o_fibra" class="fi" placeholder="Fibra"></div>
+        </div>
+        <div class="g2">
+          <div class="fg"><label>Cable de Acometida</label><input id="o_cable_acometida" class="fi" placeholder="Cable acometida"></div>
+          <div class="fg"><label>Código Caja</label><input id="o_codigo_caja" class="fi" placeholder="Código caja"></div>
+        </div>
+        <div class="g2">
+          <div class="fg"><label>Hilo</label><input id="o_hilo" class="fi" placeholder="Hilo"></div>
+          <div class="fg"><label>SW</label><input id="o_sw" class="fi" placeholder="SW"></div>
+        </div>
+        <div class="g2">
+          <div class="fg"><label>Puerto</label><input id="o_puerto" class="fi" placeholder="Puerto"></div>
+          <div class="fg"><label>Responsable IAC</label><input id="o_responsable" class="fi" placeholder="Responsable IAC"></div>
+        </div>
+      </div>
+    </div>
+
+    <!-- S2: Materiales -->
+    <div class="card">
+      <div class="card-head"><span class="sec-n">2</span><h2>Materiales Ocupados</h2></div>
+      <div class="card-body">
+        <div class="twrap">
+          <table style="width:100%;border-collapse:collapse;font-size:12.5px">
+            <thead><tr style="background:var(--blue);color:#fff">
+              <th style="padding:8px;text-align:left">Material</th>
+              <th style="padding:8px;text-align:center;width:120px">Cantidad</th>
+            </tr></thead>
+            <tbody>
+              <tr><td style="padding:5px 8px;border:1px solid var(--border);color:var(--blue);font-weight:600">Fibra de Acometida (m)</td><td style="border:1px solid var(--border);padding:2px"><input class="fi" id="om_fibra_m" style="border:none;padding:4px 6px;font-size:12px;text-align:center"></td></tr>
+              <tr style="background:#f8fafc"><td style="padding:5px 8px;border:1px solid var(--border);color:var(--blue);font-weight:600">Cable UTP (m)</td><td style="border:1px solid var(--border);padding:2px"><input class="fi" id="om_cable_utp" style="border:none;padding:4px 6px;font-size:12px;text-align:center"></td></tr>
+              <tr><td style="padding:5px 8px;border:1px solid var(--border);color:var(--blue);font-weight:600">Conector RJ45 (u)</td><td style="border:1px solid var(--border);padding:2px"><input class="fi" id="om_conector_rj45" style="border:none;padding:4px 6px;font-size:12px;text-align:center"></td></tr>
+              <tr style="background:#f8fafc"><td style="padding:5px 8px;border:1px solid var(--border);color:var(--blue);font-weight:600">Patchcord FO (u)</td><td style="border:1px solid var(--border);padding:2px"><input class="fi" id="om_pathcord_fo" style="border:none;padding:4px 6px;font-size:12px;text-align:center"></td></tr>
+              <tr><td style="padding:5px 8px;border:1px solid var(--border);color:var(--blue);font-weight:600">Simplex (u)</td><td style="border:1px solid var(--border);padding:2px"><input class="fi" id="om_simplex" style="border:none;padding:4px 6px;font-size:12px;text-align:center"></td></tr>
+              <tr style="background:#f8fafc"><td style="padding:5px 8px;border:1px solid var(--border);color:var(--blue);font-weight:600">Botitas (u)</td><td style="border:1px solid var(--border);padding:2px"><input class="fi" id="om_botitas" style="border:none;padding:4px 6px;font-size:12px;text-align:center"></td></tr>
+              <tr><td style="padding:5px 8px;border:1px solid var(--border);color:var(--blue);font-weight:600">Tubillos de Fusión (u)</td><td style="border:1px solid var(--border);padding:2px"><input class="fi" id="om_tubillos" style="border:none;padding:4px 6px;font-size:12px;text-align:center"></td></tr>
+              <tr style="background:#f8fafc"><td style="padding:5px 8px;border:1px solid var(--border);color:var(--blue);font-weight:600">Duplex (u)</td><td style="border:1px solid var(--border);padding:2px"><input class="fi" id="om_duplex" style="border:none;padding:4px 6px;font-size:12px;text-align:center"></td></tr>
+              <tr><td style="padding:5px 8px;border:1px solid var(--border);color:var(--blue);font-weight:600">Caja Multimedia (u)</td><td style="border:1px solid var(--border);padding:2px"><input class="fi" id="om_caja_multimedia" style="border:none;padding:4px 6px;font-size:12px;text-align:center"></td></tr>
+              <tr style="background:#f8fafc"><td style="padding:5px 8px;border:1px solid var(--border);color:var(--blue);font-weight:600">Serie TX Nodo</td><td style="border:1px solid var(--border);padding:2px"><input class="fi" id="om_serie_tx_nodo" style="border:none;padding:4px 6px;font-size:12px;text-align:center"></td></tr>
+              <tr><td style="padding:5px 8px;border:1px solid var(--border);color:var(--blue);font-weight:600">Serie TX Cliente</td><td style="border:1px solid var(--border);padding:2px"><input class="fi" id="om_serie_tx_cliente" style="border:none;padding:4px 6px;font-size:12px;text-align:center"></td></tr>
+              <tr style="background:#f8fafc"><td style="padding:5px 8px;border:1px solid var(--border);color:var(--blue);font-weight:600">Router Modelo</td><td style="border:1px solid var(--border);padding:2px"><input class="fi" id="om_router_modelo" style="border:none;padding:4px 6px;font-size:12px;text-align:center"></td></tr>
+              <tr><td style="padding:5px 8px;border:1px solid var(--border);color:var(--blue);font-weight:600">Router Serie</td><td style="border:1px solid var(--border);padding:2px"><input class="fi" id="om_router_serie" style="border:none;padding:4px 6px;font-size:12px;text-align:center"></td></tr>
+            </tbody>
+          </table>
+        </div>
+        <p style="font-size:11px;font-weight:700;color:var(--muted);text-transform:uppercase;letter-spacing:.5px;margin:14px 0 6px">Materiales Extras</p>
+        <div class="g2">
+          <div class="fg"><label>Ganchos</label><input id="om_ganchos" class="fi" placeholder="Cantidad"></div>
+          <div class="fg"><label>Amarras</label><input id="om_amarras" class="fi" placeholder="Cantidad"></div>
+        </div>
+        <div class="g1"><div class="fg"><label>Pinzas</label><input id="om_pinzas" class="fi" placeholder="Cantidad"></div></div>
+      </div>
+    </div>
+
+    <!-- S3: SI/NO -->
+    <div class="card">
+      <div class="card-head"><span class="sec-n">3</span><h2>Novedades e Instalación</h2></div>
+      <div class="card-body">
+        <p style="font-size:12.5px;color:var(--muted);margin-bottom:14px">Estimado cliente, favor responder las siguientes preguntas:</p>
+<div id="sinoCont">
+        <div style="display:flex;align-items:center;justify-content:space-between;padding:10px 0;border-bottom:1px solid var(--border);gap:12px;flex-wrap:wrap">
+          <span style="font-size:13px;color:var(--text);flex:1;min-width:200px">La puntualidad de la llegada de la cuadrilla fue satisfactoria</span>
+          <div style="display:flex;gap:8px;flex-shrink:0">
+            <button id="sino_si_0" type="button" class="sino-btn" onclick="setSiNo(0,0)">SI</button>
+            <button id="sino_no_0" type="button" class="sino-btn" onclick="setSiNo(0,1)">NO</button>
+          </div>
+        </div>
+        <div style="display:flex;align-items:center;justify-content:space-between;padding:10px 0;border-bottom:1px solid var(--border);gap:12px;flex-wrap:wrap">
+          <span style="font-size:13px;color:var(--text);flex:1;min-width:200px">La calidad de la instalación de la cuadrilla fue satisfactoria</span>
+          <div style="display:flex;gap:8px;flex-shrink:0">
+            <button id="sino_si_1" type="button" class="sino-btn" onclick="setSiNo(1,0)">SI</button>
+            <button id="sino_no_1" type="button" class="sino-btn" onclick="setSiNo(1,1)">NO</button>
+          </div>
+        </div>
+        <div style="display:flex;align-items:center;justify-content:space-between;padding:10px 0;border-bottom:1px solid var(--border);gap:12px;flex-wrap:wrap">
+          <span style="font-size:13px;color:var(--text);flex:1;min-width:200px">La presencia, lenguaje, vestimenta, cordialidad de la cuadrilla fue satisfactoria</span>
+          <div style="display:flex;gap:8px;flex-shrink:0">
+            <button id="sino_si_2" type="button" class="sino-btn" onclick="setSiNo(2,0)">SI</button>
+            <button id="sino_no_2" type="button" class="sino-btn" onclick="setSiNo(2,1)">NO</button>
+          </div>
+        </div>
+        <div style="display:flex;align-items:center;justify-content:space-between;padding:10px 0;border-bottom:1px solid var(--border);gap:12px;flex-wrap:wrap">
+          <span style="font-size:13px;color:var(--text);flex:1;min-width:200px">¿Están identificados los bienes de propiedad del cliente antes de la instalación?</span>
+          <div style="display:flex;gap:8px;flex-shrink:0">
+            <button id="sino_si_3" type="button" class="sino-btn" onclick="setSiNo(3,0)">SI</button>
+            <button id="sino_no_3" type="button" class="sino-btn" onclick="setSiNo(3,1)">NO</button>
+          </div>
+        </div>
+        <div style="display:flex;align-items:center;justify-content:space-between;padding:10px 0;border-bottom:1px solid var(--border);gap:12px;flex-wrap:wrap">
+          <span style="font-size:13px;color:var(--text);flex:1;min-width:200px">¿Se solicitó al cliente la reubicación de algún bien de su propiedad para salvaguardarlo?</span>
+          <div style="display:flex;gap:8px;flex-shrink:0">
+            <button id="sino_si_4" type="button" class="sino-btn" onclick="setSiNo(4,0)">SI</button>
+            <button id="sino_no_4" type="button" class="sino-btn" onclick="setSiNo(4,1)">NO</button>
+          </div>
+        </div>
+        <div style="display:flex;align-items:center;justify-content:space-between;padding:10px 0;border-bottom:1px solid var(--border);gap:12px;flex-wrap:wrap">
+          <span style="font-size:13px;color:var(--text);flex:1;min-width:200px">¿Existió pérdida, deterioro o cualquier otra novedad con los bienes de propiedad del cliente?</span>
+          <div style="display:flex;gap:8px;flex-shrink:0">
+            <button id="sino_si_5" type="button" class="sino-btn" onclick="setSiNo(5,0)">SI</button>
+            <button id="sino_no_5" type="button" class="sino-btn" onclick="setSiNo(5,1)">NO</button>
+          </div>
+        </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- S4: Firmas -->
+    <div class="card">
+      <div class="card-head"><span class="sec-n">4</span><h2>Firmas</h2></div>
+      <div class="card-body">
+        <div class="g2">
+          <div class="fg">
+            <label>Firma del Técnico</label>
+            <div style="border:1.5px solid var(--border);border-radius:7px;overflow:hidden;background:#fff">
+              <canvas id="sigTecnico" width="300" height="120" style="display:block;cursor:crosshair;touch-action:none;width:100%"></canvas>
+            </div>
+            <button class="btn btn-ghost btn-xs" onclick="clearSig('sigTecnico','firmaT')" style="margin-top:4px">Limpiar</button>
+            <input type="hidden" id="firmaT">
+          </div>
+          <div class="fg">
+            <label>Firma del Cliente</label>
+            <div style="border:1.5px solid var(--border);border-radius:7px;overflow:hidden;background:#fff">
+              <canvas id="sigCliente" width="300" height="120" style="display:block;cursor:crosshair;touch-action:none;width:100%"></canvas>
+            </div>
+            <button class="btn btn-ghost btn-xs" onclick="clearSig('sigCliente','firmaC')" style="margin-top:4px">Limpiar</button>
+            <input type="hidden" id="firmaC">
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <div style="display:flex;gap:10px;justify-content:flex-end;flex-wrap:wrap;margin-top:4px">
+      <button class="btn btn-ghost" onclick="limpiarOPU()">Limpiar formulario</button>
+      <button class="btn btn-red" onclick="generarOPU()">
+        <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M14 2H6a2 2 0 00-2 2v16a2 2 0 002 2h12a2 2 0 002-2V8z"/><polyline points="14 2 14 8 20 8"/></svg>
+        Generar Word
+      </button>
+    </div>
+  </div>
+</div>
+
+</body>

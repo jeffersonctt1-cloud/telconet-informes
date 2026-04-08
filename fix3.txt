@@ -1,0 +1,39 @@
+Mejora la pantalla de PREVISUALIZACIÓN en index.html para que muestre TODOS los datos completos:
+
+SECCIÓN 1 - ENCABEZADO (mostrar todos los valores):
+- TAREA: [valor]
+- ENTIDAD: [valor]
+- REALIZADO POR: [valor]
+- CARGO: [valor]
+- FECHA: [valor]
+- DEPARTAMENTO: [valor]
+
+SECCIÓN 2 - DATOS DEL PROYECTO (mostrar todos los valores):
+- NOMBRE DEL PROYECTO: [valor]
+- PARROQUIA: [valor]
+- CIUDAD/CANTÓN: [valor]
+- DIRECCIÓN/REFERENCIA: [valor]
+
+SECCIÓN 3 - TABLA DE POZOS:
+Mostrar una tabla HTML completa con TODAS las columnas y TODOS los valores ingresados:
+Item | Código Pozo | Dirección/Ruta | Coordenadas | Estado | Autorizado
+Solo mostrar filas que tengan al menos un dato ingresado.
+
+SECCIÓN 4 - ARCHIVO FOTOGRÁFICO:
+Por cada foto subida mostrar:
+- La imagen en miniatura (máximo 150px de ancho)
+- "Fig N" debajo
+- "Coordenadas: [valor]" debajo
+
+SECCIÓN 5 - OBSERVACIONES:
+Mostrar el texto completo ingresado
+
+SECCIÓN 6 - RECOMENDACIONES:
+Mostrar el texto completo ingresado
+
+IMPORTANTE:
+- Si un campo está vacío mostrar "(sin datos)" en gris
+- Cada sección debe tener su título en azul #1a3a5c
+- Los valores deben verse claramente, fuente legible en celular
+- El modal debe tener scroll para ver todo el contenido
+- Los botones EDITAR y GENERAR PDF deben estar siempre visibles al fondo (posición fija dentro del modal)

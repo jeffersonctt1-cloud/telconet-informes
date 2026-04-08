@@ -1,0 +1,28 @@
+Realiza estos 2 cambios en index.html:
+
+CAMBIO 1 - GPS AUTOMÁTICO EN COORDENADAS:
+En la tabla de pozos, cada fila tiene una columna "Coordenadas".
+En lugar de campo de texto manual, agregar un botón con ícono de ubicación (📍) junto al campo de coordenadas.
+Al hacer clic en ese botón:
+- Usar navigator.geolocation.getCurrentPosition() para obtener GPS del dispositivo
+- Llenar automáticamente el campo con el formato: "latitud, longitud" con 6 decimales
+- Mostrar un pequeño spinner mientras obtiene la ubicación
+- Si el GPS falla o el usuario niega permisos, mostrar mensaje "No se pudo obtener ubicación, ingrese manualmente" y dejar el campo editable
+- El campo debe seguir siendo editable después de obtener GPS por si necesita corregir
+- En celular esto usa el GPS real, en PC usa ubicación por IP/WiFi
+
+CAMBIO 2 - PANTALLA DE PREVISUALIZACIÓN ANTES DEL PDF:
+Antes de generar el PDF, mostrar un modal de previsualización que contenga:
+- Título "PREVISUALIZACIÓN DEL INFORME" con botón X para cerrar
+- Resumen de todos los datos ingresados en formato legible:
+  * Encabezado: Tarea, Entidad, Realizado por, Cargo, Fecha, Departamento
+  * Datos del proyecto: Nombre, Parroquia, Ciudad, Dirección
+  * Tabla de pozos con todos los datos ingresados (solo filas con datos)
+  * Miniaturas de las fotos subidas con su Fig N y coordenadas
+  * Observaciones y Recomendaciones
+- Dos botones al final del modal:
+  * "EDITAR" (gris) que cierra el modal y vuelve al formulario
+  * "GENERAR PDF" (azul #1a3a5c) que cierra el modal y genera el PDF
+- El modal debe ser responsive y verse bien en celular
+- Fondo oscuro semitransparente detrás del modal
+- El botón actual "Generar PDF" ahora abre este modal primero

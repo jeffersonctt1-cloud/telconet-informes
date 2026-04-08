@@ -1,0 +1,25 @@
+Mejora el botón GPS en la tabla de pozos en index.html:
+
+Cuando el técnico hace clic en el botón 📍 de una fila:
+
+PASO 1 - Obtener coordenadas GPS:
+- Usar navigator.geolocation.getCurrentPosition()
+- Llenar el campo "Coordenadas" con: latitud, longitud (6 decimales)
+
+PASO 2 - Obtener dirección automática (geocodificación inversa):
+- Usar la API gratuita de OpenStreetMap Nominatim:
+  URL: https://nominatim.openstreetmap.org/reverse?format=json&lat=LATITUD&lon=LONGITUD&zoom=18&addressdetails=1
+- Del resultado extraer: road, house_number, suburb, city (o town o village)
+- Construir la dirección como: "CALLE NUMERO, BARRIO, CIUDAD"
+- Llenar automáticamente el campo "Dirección / Ruta" de esa fila con esa dirección
+- Si la API falla, dejar el campo vacío y mostrar mensaje "No se pudo obtener dirección, ingrese manualmente"
+
+PASO 3 - Feedback visual:
+- Mientras obtiene ubicación y dirección mostrar spinner en el botón 📍
+- Al terminar mostrar ✓ verde brevemente y volver al ícono 📍
+- Si falla mostrar ✗ rojo brevemente
+
+IMPORTANTE:
+- Agregar header en la petición: 'User-Agent': 'TelconetInspectorApp/1.0'
+- Ambos campos (Coordenadas y Dirección/Ruta) deben seguir siendo editables después
+- No bloquear el formulario mientras obtiene la ubicación
