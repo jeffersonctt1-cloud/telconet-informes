@@ -1,0 +1,8 @@
+{
+  "install": {
+    "cmds": ["pip install flask python-docx Pillow gunicorn"]
+  },
+  "start": {
+    "cmd": "gunicorn server:app --bind 0.0.0.0:$PORT --timeout 120"
+  }
+}
