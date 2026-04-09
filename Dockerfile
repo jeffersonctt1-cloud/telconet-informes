@@ -1,6 +1,6 @@
 FROM python:3.11-slim
 WORKDIR /app
-COPY requirements.txt .
-RUN pip3 install --no-cache-dir flask python-docx Pillow gunicorn
 COPY . .
+RUN python -m pip install --upgrade pip && \
+    python -m pip install flask python-docx Pillow gunicorn
 CMD gunicorn server:app --bind 0.0.0.0:$PORT --timeout 120
