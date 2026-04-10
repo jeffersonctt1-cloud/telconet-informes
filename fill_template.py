@@ -1,6 +1,9 @@
-import sys, json, base64 as b64mod, os
+import sys, json, base64 as b64mod, os, io
 from docx import Document
 from docx.shared import Cm
+
+# Temp dir: same folder as this script (works on Windows and Linux)
+_TMP_DIR = os.path.dirname(os.path.abspath(__file__))
 
 def set_cell_text(cell, text):
     for para in cell.paragraphs:
@@ -20,9 +23,7 @@ def set_label_value(cell, value):
             return
 
 def set_photo_label_cell(cell, fig_num, coords):
-    """Set Fig N in para[0] and Coordenadas in para[1]"""
     paras = cell.paragraphs
-    # para[0]: Fig N.
     if len(paras) > 0:
         for run in paras[0].runs:
             run.text = ''
@@ -30,7 +31,6 @@ def set_photo_label_cell(cell, fig_num, coords):
             paras[0].runs[0].text = f'Fig {fig_num}.  '
         else:
             paras[0].add_run(f'Fig {fig_num}.  ')
-    # para[1]: Coordenadas: value
     if len(paras) > 1:
         for run in paras[1].runs:
             run.text = ''
@@ -50,20 +50,16 @@ def add_image_to_cell(cell, img_b64):
     if ',' in img_b64:
         img_b64 = img_b64.split(',')[1]
     img_bytes = b64mod.b64decode(img_b64)
-    tmp = 'C:\\t\\p.jpg'
-    os.makedirs('C:\\t', exist_ok=True)
-    # Resize image before inserting to keep it compact
     try:
-        import io
         from PIL import Image as PILImage
         pil_img = PILImage.open(io.BytesIO(img_bytes))
-        # Resize to max 800x600 to reduce file size and display size
         pil_img.thumbnail((800, 600), PILImage.LANCZOS)
         buf = io.BytesIO()
         pil_img.save(buf, format='JPEG', quality=75)
         img_bytes = buf.getvalue()
     except:
         pass
+    tmp = os.path.join(_TMP_DIR, 'p.jpg')
     with open(tmp, 'wb') as f:
         f.write(img_bytes)
     try:
@@ -85,26 +81,22 @@ def fill_template(data_file, output_path, template_path):
 
     doc = Document(template_path)
 
-    # TABLE 0: INFORMACION TELCONET — Realizado por/Cargo/Fecha/Dpto
     t0 = doc.tables[0]
     set_label_value(t0.rows[1].cells[0], data.get('realizado',''))
     set_label_value(t0.rows[1].cells[1], data.get('cargo',''))
     set_label_value(t0.rows[2].cells[0], data.get('fecha',''))
     set_label_value(t0.rows[2].cells[1], data.get('dpto',''))
 
-    # TABLE 1: Tarea / Entidad
     t1 = doc.tables[1]
     set_cell_text(t1.rows[0].cells[1], data.get('tarea',''))
     set_cell_text(t1.rows[1].cells[1], data.get('entidad','CNT'))
 
-    # TABLE 2: Datos del proyecto
     t2 = doc.tables[2]
     set_cell_text(t2.rows[1].cells[1], data.get('proyecto',''))
     set_cell_text(t2.rows[2].cells[1], data.get('parroquia',''))
     set_cell_text(t2.rows[2].cells[3], data.get('ciudad',''))
     set_cell_text(t2.rows[3].cells[1], data.get('dir',''))
 
-    # TABLE 3: Pozos
     t3 = doc.tables[3]
     max_rows = len(t3.rows) - 1
     wells = [w for w in data.get('wells',[]) if w.get('codigo') or w.get('dir') or w.get('coords')]
@@ -133,22 +125,11 @@ def fill_template(data_file, output_path, template_path):
     for row in rows_to_remove:
         remove_row(t3, row)
 
-    # TABLE 4: Archivo fotografico
-    # Correct structure:
-    # row 0 = img(Fig1, Fig2)      <- image goes HERE
-    # row 1 = label(Fig1, Fig2)    <- Fig N + Coordenadas
-    # row 2 = img(Fig3, Fig4)
-    # row 3 = label(Fig3, Fig4)
-    # row 4 = img(Fig5)
-    # row 5 = label(Fig5)
     t4 = doc.tables[4]
     fotos = data.get('fotos', [])
     n = len(fotos)
-
-    # Save all row references BEFORE any deletion
     all_rows = list(t4.rows)
 
-    # Fill label cells: (row, col, fig_num)
     label_slots = [(1,0,1),(1,1,2),(3,0,3),(3,1,4),(5,0,5)]
     for (ri, col, fig_n) in label_slots:
         if ri < len(all_rows):
@@ -159,7 +140,6 @@ def fill_template(data_file, output_path, template_path):
             else:
                 clear_photo_label_cell(cell)
 
-    # Fill image cells: (row, col, fotos_idx)
     img_slots = [(0,0,0),(0,1,1),(2,0,2),(2,1,3),(4,0,4)]
     for (ri, col, idx) in img_slots:
         if ri < len(all_rows):
@@ -167,21 +147,18 @@ def fill_template(data_file, output_path, template_path):
             if idx < n and fotos[idx].get('img'):
                 add_image_to_cell(cell, fotos[idx]['img'])
 
-    # Keep only needed rows, delete rest
     rows_needed = set()
-    if n >= 1: rows_needed.update([0, 1])   # img+label for Fig1,2
-    if n >= 3: rows_needed.update([2, 3])   # img+label for Fig3,4
-    if n >= 5: rows_needed.update([4, 5])   # img+label for Fig5
+    if n >= 1: rows_needed.update([0, 1])
+    if n >= 3: rows_needed.update([2, 3])
+    if n >= 5: rows_needed.update([4, 5])
 
     for r_idx in range(len(all_rows)-1, -1, -1):
         if r_idx not in rows_needed:
             remove_row(t4, all_rows[r_idx])
 
-    # TABLE 5: Observaciones
     t5 = doc.tables[5]
     set_cell_text(t5.rows[0].cells[0], data.get('obs',''))
 
-    # TABLE 6: Recomendaciones
     t6 = doc.tables[6]
     set_cell_text(t6.rows[0].cells[0], data.get('rec',''))
 
