@@ -2,7 +2,6 @@ import sys, json, base64 as b64mod, os, io
 from docx import Document
 from docx.shared import Cm
 
-# Temp dir: same folder as this script (works on Windows and Linux)
 _TMP_DIR = os.path.dirname(os.path.abspath(__file__))
 
 def set_cell_text(cell, text):
@@ -81,22 +80,26 @@ def fill_template(data_file, output_path, template_path):
 
     doc = Document(template_path)
 
+    # TABLE 0: Encabezado
     t0 = doc.tables[0]
     set_label_value(t0.rows[1].cells[0], data.get('realizado',''))
     set_label_value(t0.rows[1].cells[1], data.get('cargo',''))
     set_label_value(t0.rows[2].cells[0], data.get('fecha',''))
     set_label_value(t0.rows[2].cells[1], data.get('dpto',''))
 
+    # TABLE 1: Tarea / Entidad
     t1 = doc.tables[1]
     set_cell_text(t1.rows[0].cells[1], data.get('tarea',''))
     set_cell_text(t1.rows[1].cells[1], data.get('entidad','CNT'))
 
+    # TABLE 2: Datos generales
     t2 = doc.tables[2]
     set_cell_text(t2.rows[1].cells[1], data.get('proyecto',''))
     set_cell_text(t2.rows[2].cells[1], data.get('parroquia',''))
     set_cell_text(t2.rows[2].cells[3], data.get('ciudad',''))
     set_cell_text(t2.rows[3].cells[1], data.get('dir',''))
 
+    # TABLE 3: Pozos
     t3 = doc.tables[3]
     max_rows = len(t3.rows) - 1
     wells = [w for w in data.get('wells',[]) if w.get('codigo') or w.get('dir') or w.get('coords')]
@@ -125,6 +128,7 @@ def fill_template(data_file, output_path, template_path):
     for row in rows_to_remove:
         remove_row(t3, row)
 
+    # TABLE 4: Fotos
     t4 = doc.tables[4]
     fotos = data.get('fotos', [])
     n = len(fotos)
@@ -156,9 +160,56 @@ def fill_template(data_file, output_path, template_path):
         if r_idx not in rows_needed:
             remove_row(t4, all_rows[r_idx])
 
+    # Calcular cuántas filas se eliminaron de t4
+    # Con 5 fotos: 6 filas → 0 eliminadas → 13 párrafos vacíos OK
+    # Con 3-4 fotos: 4 filas → 2 eliminadas → eliminar ~4 párrafos vacíos
+    # Con 1-2 fotos: 2 filas → 4 eliminadas → eliminar ~8 párrafos vacíos
+    # Con 0 fotos: 0 filas → 6 eliminadas → eliminar todos los párrafos vacíos
+    filas_eliminadas = len(all_rows) - len(rows_needed)
+
+    # Eliminar párrafos vacíos sobrantes después de t4
+    # Cada par de filas eliminadas equivale a ~4 párrafos vacíos sobrantes
+    # Dejamos siempre 1 párrafo vacío de separación
+    from docx.text.paragraph import Paragraph as _Para
+    from docx.oxml.ns import qn as _qn
+
+    t4_elem = doc.tables[4]._tbl
+    body = doc.element.body
+    body_children = list(body)
+
+    # Encontrar posición de t4 en el body
+    t4_pos = None
+    for idx, child in enumerate(body_children):
+        if child is t4_elem:
+            t4_pos = idx
+            break
+
+    if t4_pos is not None and filas_eliminadas > 0:
+        # Contar párrafos vacíos consecutivos después de t4
+        paras_vacios = []
+        for child in body_children[t4_pos + 1:]:
+            tag = child.tag.split('}')[-1]
+            if tag == 'p':
+                p = _Para(child, doc)
+                if p.text.strip() == '' and len(p.runs) == 0:
+                    paras_vacios.append(child)
+                else:
+                    break  # encontramos contenido real, parar
+            else:
+                break  # encontramos tabla u otro elemento, parar
+
+        # Calcular cuántos eliminar: cada 2 filas eliminadas = ~4 párrafos sobrantes
+        # Máximo: dejar siempre 1 párrafo de separación
+        n_eliminar = min(filas_eliminadas * 2, max(0, len(paras_vacios) - 1))
+
+        for p_elem in paras_vacios[:n_eliminar]:
+            body.remove(p_elem)
+
+    # TABLE 5: Observaciones
     t5 = doc.tables[5]
     set_cell_text(t5.rows[0].cells[0], data.get('obs',''))
 
+    # TABLE 6: Recomendaciones
     t6 = doc.tables[6]
     set_cell_text(t6.rows[0].cells[0], data.get('rec',''))
 
